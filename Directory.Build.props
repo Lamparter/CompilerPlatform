@@ -1,0 +1,18 @@
+<Project>
+	<Import Project="$(MSBuildThisFileDirectory)\eng\LanguageInternals.props" Condition="Exists('$(MSBuildThisFileDirectory)\eng\LanguageInternals.props')" />
+	<Import Project="$(MSBuildThisFileDirectory)\eng\PackageMetadata.props" Condition="Exists('$(MSBuildThisFileDirectory)\eng\PackageMetadata.props')" />
+	<PropertyGroup>
+		<RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
+		<SourceDirectory>$(RootDirectory)\src</SourceDirectory>
+		<BuildDirectory>$(RootDirectory)\eng</BuildDirectory>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>12.0</LangVersion>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Product>Riverside.CompilerPlatform</Product>
+	</PropertyGroup>
+</Project>

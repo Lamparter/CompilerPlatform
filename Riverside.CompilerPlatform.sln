@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.35906.104
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Riverside.CompilerPlatform.SourceGenerators", "src\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj", "{A478D15C-C89D-4408-AB2C-4FA0EBC01B67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		CSharp|Any CPU = CSharp|Any CPU
+		VisualBasic|Any CPU = VisualBasic|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A478D15C-C89D-4408-AB2C-4FA0EBC01B67}.CSharp|Any CPU.ActiveCfg = CSharp|Any CPU
+		{A478D15C-C89D-4408-AB2C-4FA0EBC01B67}.CSharp|Any CPU.Build.0 = CSharp|Any CPU
+		{A478D15C-C89D-4408-AB2C-4FA0EBC01B67}.VisualBasic|Any CPU.ActiveCfg = VisualBasic|Any CPU
+		{A478D15C-C89D-4408-AB2C-4FA0EBC01B67}.VisualBasic|Any CPU.Build.0 = VisualBasic|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FBC4E320-8D16-4BEF-BBFB-B662758E574C}
+	EndGlobalSection
+EndGlobal
