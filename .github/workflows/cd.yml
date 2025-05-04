@@ -15,6 +15,7 @@ env:
 jobs:
   publish:
     runs-on: windows-latest
+    environment: NuGet
 
     strategy:
       matrix:
