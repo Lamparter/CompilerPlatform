@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Riverside.CompilerPlatform.SourceGenerators.Extensions;
 using Riverside.Extensions.Accountability;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
