@@ -2,6 +2,11 @@ name: CD
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'eng/CurrentVersion.props'
 
 env:
   WORKING_DIR: ${{ github.workspace }}
