@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="CSharp" />
+    <BuildType Name="VisualBasic" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/Riverside.CompilerPlatform.Analyzers/Riverside.CompilerPlatform.Analyzers.csproj" />
+    <Project Path="src/Riverside.CompilerPlatform.CodeFixers/Riverside.CompilerPlatform.CodeFixers.csproj" />
+    <Project Path="src/Riverside.CompilerPlatform.HighPerformance/Riverside.CompilerPlatform.HighPerformance.csproj" />
+    <Project Path="src/Riverside.CompilerPlatform.SourceGenerators/Riverside.CompilerPlatform.SourceGenerators.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Riverside.CompilerPlatform.CSharp.SourceGenerators.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj">
+      <BuildType Project="Release" />
+    </Project>
+  </Folder>
+</Solution>

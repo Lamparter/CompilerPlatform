@@ -1,6 +1,6 @@
 <Project>
 	<Import Project="$(MSBuildThisFileDirectory)\eng\LanguageInternals.props" Condition="!$(MSBuildProjectName.Contains('Tests'))" />
-	<Import Project="$(MSBuildThisFileDirectory)\eng\PackageMetadata.props" />
+	<Import Project="$(MSBuildThisFileDirectory)\eng\PackageMetadata.props" Condition="!$(MSBuildProjectName.Contains('Tests'))" />
 	<PropertyGroup>
 		<RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
 		<SourceDirectory>$(RootDirectory)\src</SourceDirectory>
