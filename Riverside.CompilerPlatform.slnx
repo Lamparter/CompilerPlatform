@@ -10,7 +10,7 @@
     <Project Path="src/Riverside.CompilerPlatform.SourceGenerators/Riverside.CompilerPlatform.SourceGenerators.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Riverside.CompilerPlatform.CSharp.SourceGenerators.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj">
+    <Project Path="tests/Riverside.CompilerPlatform.CSharp.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj">
       <BuildType Project="Release" />
     </Project>
   </Folder>
