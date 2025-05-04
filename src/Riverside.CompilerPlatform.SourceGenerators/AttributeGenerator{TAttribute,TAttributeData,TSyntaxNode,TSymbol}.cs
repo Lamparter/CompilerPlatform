@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+#if CSHARP // Visual Basic implementation is not available yet
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Riverside.CompilerPlatform.SourceGenerators.Extensions;
 using Riverside.Extensions.Accountability;
@@ -17,12 +19,11 @@ namespace Riverside.CompilerPlatform.SourceGenerators;
 /// <typeparam name="TSyntaxNode">The syntax node type to process.</typeparam>
 /// <typeparam name="TSymbol">The symbol type to process.</typeparam>
 [NotMyCode]
-public abstract class AttributeGenerator<TAttribute, TAttributeData, TSyntaxNode, TSymbol> : IncrementalGenerator
+public abstract class AttributeGenerator<TAttribute, TAttributeData, TSyntaxNode, TSymbol> : AttributeGenerator
 	where TAttribute : Attribute
 	where TSyntaxNode : MemberDeclarationSyntax
 	where TSymbol : ISymbol
 {
-	private List<SyntaxTree> _code = new();
 	private readonly string _fullAttributeName = typeof(TAttribute).FullName;
 
 	/// <summary>
@@ -30,129 +31,100 @@ public abstract class AttributeGenerator<TAttribute, TAttributeData, TSyntaxNode
 	/// </summary>
 	protected virtual bool CountAttributeSubclass => true;
 
-	/// <summary>
-	/// Gets or sets the generated code.
-	/// </summary>
-	public override List<SyntaxTree> Code
-	{
-		get => _code;
-		set => _code = value;
-	}
-
 	/// <inheritdoc/>
-	protected virtual void OnInitialize(IncrementalGeneratorPostInitializationContext context) { }
-
-	/// <inheritdoc/>
-	protected override void CustomizeInitialization(IncrementalGeneratorInitializationContext context)
+	public override void ProcessCompilation(Compilation compilation, CancellationToken cancellationToken)
 	{
-		// Register post-initialization output
-		context.RegisterPostInitializationOutput(OnInitialize);
-
-		// Set up the pipeline for processing nodes with attributes
-		var attributeProvider = context.SyntaxProvider.CreateSyntaxProvider(
-			(node, _) => node is TSyntaxNode syntaxNode && syntaxNode.AttributeLists.Count > 0,
-			(genContext, cancellationToken) => ProcessNode(genContext, cancellationToken)
-		);
-
-		// Register output generation
-		context.RegisterSourceOutput(
-			attributeProvider.Where(result => result.HasOutput),
-			(sourceContext, result) =>
-			{
-				if (result.HasOutput && result.FileName != null && result.Content != null)
-					sourceContext.AddSource(result.FileName.Replace("?", "Nullable"), result.Content);
-			});
-	}
-
-	/// <summary>
-	/// Processes a syntax node to extract attribute data and generate code.
-	/// </summary>
-	private GeneratorResult ProcessNode(GeneratorSyntaxContext genContext, CancellationToken cancellationToken)
-	{
-		try
+		// Get all syntax trees in the compilation
+		foreach (var syntaxTree in compilation.SyntaxTrees)
 		{
-			var syntaxNode = (TSyntaxNode)genContext.Node;
+			cancellationToken.ThrowIfCancellationRequested();
 
-			// Get symbols for the node
-			var symbols = GetSymbols(genContext, syntaxNode).ToArray();
-			if (symbols.Length == 0)
-				return new GeneratorResult(false);
+			// Get the semantic model for this syntax tree
+			var semanticModel = compilation.GetSemanticModel(syntaxTree);
 
-			// Get the attribute class
-			var attributeClass = genContext.SemanticModel.Compilation.GetTypeByMetadataName(_fullAttributeName);
-			if (attributeClass == null)
-				return new GeneratorResult(false);
+			// Find all relevant syntax nodes
+			var nodes = syntaxTree.GetRoot(cancellationToken)
+				.DescendantNodesAndSelf()
+				.OfType<TSyntaxNode>()
+				.Where(node => node.AttributeLists.Count > 0);
 
-			// Process attributes
-			var attributes = (
-				from attr in symbols[0].GetAttributes()
-				where CountAttributeSubclass
-					? attr.AttributeClass?.IsSubclassFrom(attributeClass) ?? false
-					: attr.AttributeClass?.IsTheSameAs(attributeClass) ?? false
-				let wrapper = TransformAttribute(attr, genContext.SemanticModel.Compilation)
-				where wrapper != null
-				select (Original: attr, Wrapper: wrapper)
-			).ToArray();
-
-			if (attributes.Length == 0)
-				return new GeneratorResult(false);
-
-			// Generate output for each symbol
-			var outputs = new List<string>();
-			foreach (var symbol in symbols)
+			foreach (var syntaxNode in nodes)
 			{
-				string? output = OnPointVisit(genContext, syntaxNode, symbol, attributes);
-				if (output != null)
-					outputs.Add(output);
+				cancellationToken.ThrowIfCancellationRequested();
+				ProcessSyntaxNode(syntaxNode, semanticModel, compilation, cancellationToken);
 			}
-
-			if (outputs.Count == 0)
-				return new GeneratorResult(false);
-
-			string joinedOutput = string.Join(Environment.NewLine + Environment.NewLine, outputs);
-
-			// Generate the complete source file
-			var containingClass = symbols[0] is INamedTypeSymbol nts ? nts : symbols[0].ContainingType;
-			var genericParams = containingClass.TypeParameters;
-			var classHeader = genericParams.Length == 0
-				? containingClass.Name
-				: $"{containingClass.Name}<{string.Join(", ", from x in genericParams select x.Name)}>";
-
-			string fileName = $"{string.Join(" ", from x in symbols select x.ToString().Replace('<', '[').Replace('>', ']'))}.g.cs";
-			string content = $$"""
-				#nullable enable
-				// Autogenerated for {{string.Join(", ", symbols)}}
-					
-				namespace {{containingClass.ContainingNamespace}}
-				{
-					partial class {{classHeader}}
-					{
-						// Original
-						/*
-						{{syntaxNode.ToString().Indent(2)}}
-						*/
-							
-						{{joinedOutput.Indent(2)}}
-					}
-				}
-				""";
-
-			return new GeneratorResult(true, fileName, content);
 		}
-		catch (Exception ex)
+	}
+
+	/// <summary>
+	/// Process an individual syntax node.
+	/// </summary>
+	private void ProcessSyntaxNode(TSyntaxNode syntaxNode, SemanticModel semanticModel, Compilation compilation, CancellationToken cancellationToken)
+	{
+		// Get symbols for the node
+		var symbols = GetSymbols(semanticModel, syntaxNode, cancellationToken).ToArray();
+		if (symbols.Length == 0)
+			return;
+
+		// Get the attribute class
+		var attributeClass = compilation.GetTypeByMetadataName(_fullAttributeName);
+		if (attributeClass == null)
+			return;
+
+		// Process attributes
+		var attributes = (
+			from attr in symbols[0].GetAttributes()
+			where CountAttributeSubclass
+				? attr.AttributeClass?.IsSubclassFrom(attributeClass) ?? false
+				: attr.AttributeClass?.IsTheSameAs(attributeClass) ?? false
+			let wrapper = TransformAttribute(attr, compilation)
+			where wrapper != null
+			select (Original: attr, Wrapper: wrapper)
+		).ToArray();
+
+		if (attributes.Length == 0)
+			return;
+
+		// Generate output for each symbol
+		var outputs = new List<string>();
+		foreach (var symbol in symbols)
 		{
-			// Handle exceptions by creating a diagnostic file
-			string errorContent = $$"""
-				/*
-					Exception Occurred: {{ex.GetType().FullName}}
-					Message: {{ex.Message}}
-					Stack Trace:
-						{{ex.StackTrace ?? "".Indent(2)}}
-				*/
-				""";
-
-			return new GeneratorResult(true, $"Error_{Guid.NewGuid()}.g.cs", errorContent);
+			string? output = OnPointVisit(semanticModel, syntaxNode, symbol, attributes);
+			if (output != null)
+				outputs.Add(output);
 		}
+
+		if (outputs.Count == 0)
+			return;
+
+		string joinedOutput = string.Join(Environment.NewLine + Environment.NewLine, outputs);
+
+		// Generate the complete source file
+		var containingClass = symbols[0] is INamedTypeSymbol nts ? nts : symbols[0].ContainingType;
+		var genericParams = containingClass.TypeParameters;
+		var classHeader = genericParams.Length == 0
+			? containingClass.Name
+			: $"{containingClass.Name}<{string.Join(", ", from x in genericParams select x.Name)}>";
+
+		// Create the syntax tree using the shared method from the base class
+		string fileName = GetGeneratedFileName($"{string.Join(" ", from x in symbols select x.ToString().Replace('<', '[').Replace('>', ']'))}");
+		var syntaxTree = CreateLanguageSpecificSyntaxTree(
+			symbols[0],
+			containingClass.ContainingNamespace.ToDisplayString(),
+			classHeader,
+			joinedOutput);
+
+		if (_additionalSources != null)
+			_additionalSources[fileName] = syntaxTree;
+	}
+
+	/// <summary>
+	/// Gets the symbols for a syntax node.
+	/// </summary>
+	protected virtual IEnumerable<TSymbol> GetSymbols(SemanticModel semanticModel, TSyntaxNode syntaxNode, CancellationToken cancellationToken)
+	{
+		if (semanticModel.GetDeclaredSymbol(syntaxNode, cancellationToken) is TSymbol symbol)
+			yield return symbol;
 	}
 
 	/// <summary>
@@ -166,56 +138,12 @@ public abstract class AttributeGenerator<TAttribute, TAttributeData, TSyntaxNode
 	/// <summary>
 	/// Called when visiting a symbol with attributes.
 	/// </summary>
-	/// <param name="genContext">The generator context.</param>
+	/// <param name="semanticModel">The semantic model.</param>
 	/// <param name="syntaxNode">The syntax node being processed.</param>
 	/// <param name="symbol">The symbol being processed.</param>
 	/// <param name="attributeData">The attribute data.</param>
 	/// <returns>The generated code, or null if no code should be generated.</returns>
-	protected abstract string? OnPointVisit(GeneratorSyntaxContext genContext, TSyntaxNode syntaxNode, TSymbol symbol, (AttributeData Original, TAttributeData Wrapper)[] attributeData);
-
-	/// <summary>
-	/// Gets the symbols for a syntax node.
-	/// </summary>
-	/// <param name="genContext">The generator context.</param>
-	/// <param name="syntaxNode">The syntax node being processed.</param>
-	/// <returns>The symbols for the syntax node.</returns>
-	protected virtual IEnumerable<TSymbol> GetSymbols(GeneratorSyntaxContext genContext, TSyntaxNode syntaxNode)
-	{
-		if (genContext.SemanticModel.GetDeclaredSymbol(syntaxNode) is TSymbol symbol)
-			yield return symbol;
-	}
-
-	/// <summary>
-	/// Represents the result of processing a node.
-	/// </summary>
-	private class GeneratorResult
-	{
-		/// <summary>
-		/// Gets whether the result has output.
-		/// </summary>
-		public bool HasOutput { get; }
-
-		/// <summary>
-		/// Gets the file name for the output.
-		/// </summary>
-		public string? FileName { get; }
-
-		/// <summary>
-		/// Gets the content for the output.
-		/// </summary>
-		public string? Content { get; }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="GeneratorResult"/> class.
-		/// </summary>
-		/// <param name="hasOutput">Whether the result has output.</param>
-		/// <param name="fileName">The file name for the output.</param>
-		/// <param name="content">The content for the output.</param>
-		public GeneratorResult(bool hasOutput, string? fileName = null, string? content = null)
-		{
-			HasOutput = hasOutput;
-			FileName = fileName;
-			Content = content;
-		}
-	}
+	protected abstract string? OnPointVisit(SemanticModel semanticModel, TSyntaxNode syntaxNode, TSymbol symbol, (AttributeData Original, TAttributeData Wrapper)[] attributeData);
 }
+
+#endif

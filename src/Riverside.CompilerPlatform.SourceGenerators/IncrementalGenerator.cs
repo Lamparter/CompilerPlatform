@@ -324,10 +324,18 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 		return provider1.Combine(provider2);
 	}
 
-	private static string GetGeneratedFileName(string value)
+	/// <summary>
+	/// Helper method to create a generated file name.
+	/// </summary>
+	/// <remarks>
+	/// The returned file name extension is changed based on the <c>Riverside.CompilerPlatform</c> assembly that is imported, either for Visual Basic or C#.
+	/// </remarks>
+	/// <param name="value">The file name that will have the <c>.g.cs</c> or <c>.g.vb</c> extension appended to it.</param>
+	/// <returns></returns>
+	protected static string GetGeneratedFileName(string value)
 	{
 		return value + ".g." +
-#if VisualBasic
+#if VISUALBASIC
 		"vb"
 #elif CSHARP
 		"cs"
