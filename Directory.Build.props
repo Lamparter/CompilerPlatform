@@ -1,6 +1,7 @@
 <Project>
 	<Import Project="$(MSBuildThisFileDirectory)\eng\LanguageInternals.props" Condition="!$(MSBuildProjectName.Contains('Tests'))" />
 	<Import Project="$(MSBuildThisFileDirectory)\eng\PackageMetadata.props" Condition="!$(MSBuildProjectName.Contains('Tests'))" />
+	<Import Project="$(MSBuildThisFileDirectory)\eng\CurrentVersion.props" />
 	<PropertyGroup>
 		<RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
 		<SourceDirectory>$(RootDirectory)\src</SourceDirectory>
@@ -14,6 +15,7 @@
 
 	<PropertyGroup>
 		<Product>Riverside.CompilerPlatform</Product>
+		<Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

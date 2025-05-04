@@ -1,0 +1,43 @@
+name: CD
+
+on:
+  workflow_dispatch:
+
+env:
+  WORKING_DIR: ${{ github.workspace }}
+  SOLUTION_PATH: '${{ github.workspace }}\Riverside.CompilerPlatform.slnx'
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: [CSharp, VisualBasic]
+
+    env:
+      CONFIGURATION: ${{ matrix.configuration }}
+
+    steps:
+    
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.x
+
+    - name: Restore
+      run: |
+        msbuild $env:SOLUTION_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
+
+    - name: Build
+      run: |
+        msbuild $env:SOLUTION_PATH /t:Build /p:Configuration=$env:CONFIGURATION /p:PackageOutputPath=$env:WORKING_DIR\bin
+
+    - name: Publish to NuGet
+      run: dotnet nuget push .\bin\*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

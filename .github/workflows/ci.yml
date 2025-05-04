@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  WORKING_DIR: ${{ github.workspace }}
+  SOLUTION_PATH: '${{ github.workspace }}\Riverside.CompilerPlatform.slnx'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [CSharp, VisualBasic]
+        project: [Analyzers, CodeFixers, HighPerformance, SourceGenerators]
+
+    env:
+      PROJECT: ${{ matrix.project }}
+      CONFIGURATION: ${{ matrix.configuration }}
+      PROJECT_DIR: ${{ github.workspace }}\src\Riverside.CompilerPlatform.${{ matrix.project }}
+
+    steps:
+
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.x
+
+    - name: Restore
+      run: |
+        msbuild $env:SOLUTION_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
+
+    - name: Build
+      run: |
+        msbuild $env:PROJECT_DIR /t:Build /p:Configuration=$env:CONFIGURATION
+
+  test:
+    needs: [build]
+    
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [CSharp]
+
+    env:
+      CONFIGURATION: ${{ matrix.configuration }}
+      PROJECT_DIR: ${{ github.workspace }}\tests\Riverside.CompilerPlatform.${{ matrix.configuration }}.Tests
+
+    steps:
+    
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.x
+
+    - name: Restore
+      run: |
+        msbuild $env:SOLUTION_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
+
+    - name: Build
+      run: |
+        msbuild $env:SOLUTION_PATH /t:Build /p:Configuration=$env:CONFIGURATION
+
+    - name: Test
+      run: |
+        dotnet test $env:PROJECT_DIR --configuration Release --no-build
