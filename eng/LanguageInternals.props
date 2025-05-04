@@ -1,6 +1,7 @@
 <Project>
 	<PropertyGroup>
 		<AssemblyName>Riverside.CompilerPlatform.$(Configuration).$(MSBuildProjectName.Replace("Riverside.CompilerPlatform.", ""))</AssemblyName>
+		<RootNamespace>$(AssemblyName)</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.$(Configuration)" Version="4.13.0" />
