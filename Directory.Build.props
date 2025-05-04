@@ -15,4 +15,8 @@
 	<PropertyGroup>
 		<Product>Riverside.CompilerPlatform</Product>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="$(SourceDirectory)\GlobalUsings.cs" />
+	</ItemGroup>
 </Project>
