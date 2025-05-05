@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [CSharp]
+        configuration: [CSharp, VisualBasic]
 
     env:
       CONFIGURATION: ${{ matrix.configuration }}
