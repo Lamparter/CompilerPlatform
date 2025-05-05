@@ -1,8 +1,8 @@
 <Project>
-	<PropertyGroup>
+	<PropertyGroup Condition="'$(IsLangMT)' == 'true'">
 		<AssemblyName>Riverside.CompilerPlatform.$(Configuration).$(MSBuildProjectName.Replace("Riverside.CompilerPlatform.", ""))</AssemblyName>
 	</PropertyGroup>
-	<ItemGroup>
+	<ItemGroup Condition="'$(IsLangMT)' == 'true'">
 		<PackageReference Include="Microsoft.CodeAnalysis.$(Configuration)" Version="4.13.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.$(Configuration).Workspaces" Version="4.13.0" />
 	</ItemGroup>

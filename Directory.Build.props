@@ -11,6 +11,9 @@
 	<PropertyGroup>
 		<LangVersion>12.0</LangVersion>
 		<Nullable>enable</Nullable>
+
+		<LangMT Condition="'$(Configuration)' == 'CSharp' or '$(Configuration)' == 'VisualBasic'">$(Configuration)</LangMT>
+		<IsLangMT Condition="'$(LangMT)' != ''">true</IsLangMT>
 	</PropertyGroup>
 
 	<PropertyGroup>
