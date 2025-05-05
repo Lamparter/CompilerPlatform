@@ -19,6 +19,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="$(SourceDirectory)\GlobalUsings.cs" />
+		<Compile Condition="'$(Language)' == 'C#'" Include="$(SourceDirectory)\GlobalUsings.cs" />
 	</ItemGroup>
 </Project>

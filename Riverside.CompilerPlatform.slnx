@@ -13,5 +13,8 @@
     <Project Path="tests/Riverside.CompilerPlatform.CSharp.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj">
       <BuildType Project="Release" />
     </Project>
+    <Project Path="tests/Riverside.CompilerPlatform.VisualBasic.Tests/Riverside.CompilerPlatform.VisualBasic.Tests.vbproj" Id="092ba15e-4b88-44eb-9499-454d138e2f89">
+      <BuildType Project="Release" />
+    </Project>
   </Folder>
 </Solution>
