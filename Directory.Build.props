@@ -6,6 +6,7 @@
 		<RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
 		<SourceDirectory>$(RootDirectory)\src</SourceDirectory>
 		<ExtensionsDirectory>$(RootDirectory)\src\roslyn</ExtensionsDirectory>
+		<FeaturesDirectory>$(RootDirectory)\src\features</FeaturesDirectory>
 		<BuildDirectory>$(RootDirectory)\eng</BuildDirectory>
 	</PropertyGroup>
 
@@ -23,6 +24,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Condition="'$(Language)' == 'C#'" Include="$(SourceDirectory)\GlobalUsings.cs" />
+		<Compile Condition="'$(Language)' == 'C#' and '$(IsLangMT)' == 'true'" Include="$(ExtensionsDirectory)\GlobalUsings.cs" />
 	</ItemGroup>
 </Project>
