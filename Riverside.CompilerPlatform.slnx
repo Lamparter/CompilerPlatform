@@ -5,6 +5,9 @@
   </Configurations>
   <Folder Name="/src/" />
   <Folder Name="/src/features/">
+    <Project Path="src/features/Riverside.CompilerPlatform.Features.DynamicCast/Riverside.CompilerPlatform.Features.DynamicCast.csproj" Id="fefd12c0-e73a-44b3-be8a-eb52dfcadbdb">
+      <BuildType Project="Release" />
+    </Project>
     <Project Path="src/features/Riverside.CompilerPlatform.Features.Iteration/Riverside.CompilerPlatform.Features.Iteration.csproj" Id="f807dd26-dbd4-4d16-b2d7-9a5d48dd424b">
       <BuildType Project="Release" />
     </Project>
@@ -17,6 +20,9 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Riverside.CompilerPlatform.CSharp.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj">
+      <BuildType Project="Release" />
+    </Project>
+    <Project Path="tests/Riverside.CompilerPlatform.Features.Demo/Riverside.CompilerPlatform.Features.Demo.csproj" Id="198c5333-faf0-4f00-b4ed-f714bb5309c9">
       <BuildType Project="Release" />
     </Project>
     <Project Path="tests/Riverside.CompilerPlatform.VisualBasic.Tests/Riverside.CompilerPlatform.VisualBasic.Tests.vbproj">
