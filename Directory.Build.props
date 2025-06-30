@@ -5,6 +5,7 @@
 	<PropertyGroup>
 		<RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
 		<SourceDirectory>$(RootDirectory)\src</SourceDirectory>
+		<ExtensionsDirectory>$(RootDirectory)\src\roslyn</ExtensionsDirectory>
 		<BuildDirectory>$(RootDirectory)\eng</BuildDirectory>
 	</PropertyGroup>
 

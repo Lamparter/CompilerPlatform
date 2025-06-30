@@ -3,18 +3,15 @@
     <BuildType Name="CSharp" />
     <BuildType Name="VisualBasic" />
   </Configurations>
-  <Folder Name="/src/">
-    <Project Path="src/Riverside.CompilerPlatform.Analyzers/Riverside.CompilerPlatform.Analyzers.csproj" />
-    <Project Path="src/Riverside.CompilerPlatform.CodeFixers/Riverside.CompilerPlatform.CodeFixers.csproj" />
-    <Project Path="src/Riverside.CompilerPlatform.HighPerformance/Riverside.CompilerPlatform.HighPerformance.csproj" />
-    <Project Path="src/Riverside.CompilerPlatform.SourceGenerators/Riverside.CompilerPlatform.SourceGenerators.csproj" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/roslyn/">
+    <Project Path="src/roslyn/Riverside.CompilerPlatform.Analyzers/Riverside.CompilerPlatform.Analyzers.csproj" />
+    <Project Path="src/roslyn/Riverside.CompilerPlatform.CodeFixers/Riverside.CompilerPlatform.CodeFixers.csproj" />
+    <Project Path="src/roslyn/Riverside.CompilerPlatform.HighPerformance/Riverside.CompilerPlatform.HighPerformance.csproj" />
+    <Project Path="src/roslyn/Riverside.CompilerPlatform.SourceGenerators/Riverside.CompilerPlatform.SourceGenerators.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Riverside.CompilerPlatform.CSharp.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj">
-      <BuildType Project="Release" />
-    </Project>
-    <Project Path="tests/Riverside.CompilerPlatform.VisualBasic.Tests/Riverside.CompilerPlatform.VisualBasic.Tests.vbproj" Id="092ba15e-4b88-44eb-9499-454d138e2f89">
-      <BuildType Project="Release" />
-    </Project>
+    <Project Path="tests/Riverside.CompilerPlatform.CSharp.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj" />
+    <Project Path="tests/Riverside.CompilerPlatform.VisualBasic.Tests/Riverside.CompilerPlatform.VisualBasic.Tests.vbproj" />
   </Folder>
 </Solution>
