@@ -5,6 +5,9 @@
   </Configurations>
   <Folder Name="/src/" />
   <Folder Name="/src/features/">
+    <Project Path="src/features/Riverside.CompilerPlatform.Features.@Override/Riverside.CompilerPlatform.Features.@Override.csproj" Id="a2e2b3be-06ae-4785-9661-544561d13bcb">
+      <BuildType Project="Release" />
+    </Project>
     <Project Path="src/features/Riverside.CompilerPlatform.Features.DynamicCast/Riverside.CompilerPlatform.Features.DynamicCast.csproj" Id="fefd12c0-e73a-44b3-be8a-eb52dfcadbdb">
       <BuildType Project="Release" />
     </Project>
