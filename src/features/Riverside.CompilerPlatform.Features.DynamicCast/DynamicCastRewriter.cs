@@ -1,11 +1,13 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Riverside.CompilerPlatform.Features.DynamicCast;
 
-public class DynamicCastRewriter : CSharpSyntaxRewriter
+public class DynamicCastRewriter :
+#if CSHARP
+	CSharpSyntaxRewriter
+#elif VISUALBASIC
+	VisualBasicSyntaxRewriter
+#endif
 {
 	private readonly SemanticModel _semanticModel;
 

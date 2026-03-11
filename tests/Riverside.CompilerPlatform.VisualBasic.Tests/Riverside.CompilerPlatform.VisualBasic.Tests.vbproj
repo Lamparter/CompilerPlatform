@@ -1,6 +1,7 @@
 ﻿<Project Sdk="MSTest.Sdk/3.6.4">
 
 	<PropertyGroup>
+		<Configurations>VisualBasic</Configurations>
 		<TargetFramework>net8.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>

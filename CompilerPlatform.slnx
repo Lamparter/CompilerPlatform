@@ -1,0 +1,38 @@
+<Solution>
+	<Configurations>
+		<BuildType Name="CSharp" />
+		<BuildType Name="VisualBasic" />
+	</Configurations>
+	<Folder Name="/src/" />
+	<Folder Name="/src/features/">
+		<Project Path="src/features/Riverside.CompilerPlatform.Features.DynamicCast/Riverside.CompilerPlatform.Features.DynamicCast.csproj">
+			<BuildType Name="CSharp" Project="CSharp" />
+			<Build Solution="VisualBasic|*" Project="false" />
+			<!--<Build Solution="CSharp|*" Project="true" />-->
+		</Project>
+		<Project Path="src/features/Riverside.CompilerPlatform.Features.Iteration/Riverside.CompilerPlatform.Features.Iteration.csproj">
+			<BuildType Name="CSharp" Project="CSharp" />
+			<Build Solution="VisualBasic|*" Project="false" />
+			<!--<Build Solution="CSharp|*" Project="true" />-->
+		</Project>
+	</Folder>
+	<Folder Name="/src/roslyn/">
+		<Project Path="src/roslyn/Riverside.CompilerPlatform.Analyzers/Riverside.CompilerPlatform.Analyzers.csproj" />
+		<Project Path="src/roslyn/Riverside.CompilerPlatform.CodeFixers/Riverside.CompilerPlatform.CodeFixers.csproj" />
+		<Project Path="src/roslyn/Riverside.CompilerPlatform.HighPerformance/Riverside.CompilerPlatform.HighPerformance.csproj" />
+		<Project Path="src/roslyn/Riverside.CompilerPlatform.SourceGenerators/Riverside.CompilerPlatform.SourceGenerators.csproj" />
+	</Folder>
+	<Folder Name="/tests/">
+		<Project Path="tests/Riverside.CompilerPlatform.CSharp.Tests/Riverside.CompilerPlatform.CSharp.Tests.csproj">
+			<BuildType Name="CSharp" Project="CSharp" />
+			<Build Solution="VisualBasic|*" Project="false" />
+			<!--<Build Solution="CSharp|*" Project="true" />-->
+		</Project>
+		<Project Path="tests/Riverside.CompilerPlatform.Features.Demo/Riverside.CompilerPlatform.Features.Demo.csproj" Id="198c5333-faf0-4f00-b4ed-f714bb5309c9" />
+		<Project Path="tests/Riverside.CompilerPlatform.VisualBasic.Tests/Riverside.CompilerPlatform.VisualBasic.Tests.vbproj">
+			<BuildType Name="VisualBasic" Project="VisualBasic" />
+			<Build Solution="CSharp|*" Project="false" />
+			<!--<Build Solution="VisualBasic|*" Project="true" />-->
+		</Project>
+	</Folder>
+</Solution>

@@ -16,7 +16,7 @@ namespace Riverside.CompilerPlatform.SourceGenerators;
 /// </summary>
 [Obsolete]
 [NotMyCode]
-public abstract class AttributeGenerator : IncrementalGenerator
+public abstract class AttributeGenerator : SimpleGenerator
 {
 	internal Dictionary<string, SyntaxTree>? _additionalSources = null;
 	internal Diagnostic? _lastError = null;
@@ -43,7 +43,7 @@ public abstract class AttributeGenerator : IncrementalGenerator
 	/// <summary>
 	/// Called before source generation begins.
 	/// </summary>
-	protected override void OnBeforeGeneration(Compilation compilation, CancellationToken cancellationToken)
+	protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 	{
 		// Clear previous results
 		Code.Clear();
@@ -52,7 +52,7 @@ public abstract class AttributeGenerator : IncrementalGenerator
 		// Process the compilation
 		try
 		{
-			ProcessCompilation(compilation, cancellationToken);
+			ProcessCompilation(context.Compilation, cancellationToken);
 		}
 		catch (Exception ex)
 		{

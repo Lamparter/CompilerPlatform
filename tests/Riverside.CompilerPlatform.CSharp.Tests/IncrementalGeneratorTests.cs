@@ -9,7 +9,7 @@ namespace Riverside.CompilerPlatform.CSharp.Tests;
 public sealed class IncrementalGeneratorTests
 {
 	[TestMethod]
-	public async Task GeneratesSourceFromCodeProperty()
+	public async Task GeneratesSourceFromAddSourceMethod()
 	{
 		// Arrange
 		var generator = new TestSourceGenerator();
@@ -56,12 +56,10 @@ public sealed class IncrementalGeneratorTests
 		var fileNames = result.GeneratedTrees.Select(s => s.FilePath).ToArray();
 
 		// Verify that we have files matching our expected naming pattern
-		Assert.IsTrue(fileNames.Any(f => f.Contains("GeneratedFile1.g.cs") ||
-										 f.Contains("Generated_1.g.cs")),
+		Assert.IsTrue(fileNames.Any(f => f.Contains("GeneratedFile1.g.cs")),
 					 "First generated file name not found");
 
-		Assert.IsTrue(fileNames.Any(f => f.Contains("GeneratedFile2.g.cs") ||
-										 f.Contains("Generated_2.g.cs")),
+		Assert.IsTrue(fileNames.Any(f => f.Contains("GeneratedFile2.g.cs")),
 					 "Second generated file name not found");
 
 		// Additional verification - check content to ensure proper order
@@ -91,10 +89,10 @@ public sealed class IncrementalGeneratorTests
 	}
 
 	[TestMethod]
-	public async Task SupportsAdditionalSources()
+	public async Task SupportsMultipleSourcesViaAddSource()
 	{
 		// Arrange
-		var generator = new TestSourceGeneratorWithAdditionalSources();
+		var generator = new TestSourceGeneratorWithMultipleSources();
 		var compilation = CreateCompilation("public class TestClass {}");
 
 		// Act
@@ -103,8 +101,7 @@ public sealed class IncrementalGeneratorTests
 		// Assert
 		Assert.AreEqual(2, result.GeneratedTrees.Length);
 
-		// Find the additional source - we need to check if a file path contains our file name
-		// rather than exact equality because paths may include additional information
+		// Find the additional source
 		var additionalSource = result.GeneratedTrees.FirstOrDefault(s =>
 			Path.GetFileName(s.FilePath) == "AdditionalFile.g.cs" ||
 			s.FilePath.Contains("AdditionalFile.g.cs"));
@@ -128,6 +125,32 @@ public sealed class IncrementalGeneratorTests
 		Assert.IsTrue(generator.AfterGenerationCalled);
 	}
 
+	[TestMethod]
+	public async Task ContextIsAvailableInLifecycleMethods()
+	{
+		// Arrange
+		var generator = new TestSourceGeneratorWithContextAccess();
+		var compilation = CreateCompilation("public class TestClass {}");
+
+		// Act
+		var result = RunGenerator(compilation, generator);
+
+		// Assert
+		Assert.IsTrue(generator.ContextWasAvailable);
+		Assert.IsNotNull(generator.CapturedCompilation);
+		Assert.AreEqual("compilation", generator.CapturedCompilation.AssemblyName);
+	}
+
+	[TestMethod]
+	public async Task GetGeneratedFileNameCreatesCorrectExtension()
+	{
+		// Arrange
+		var fileName = IncrementalGenerator.GetGeneratedFileName("MyFile");
+
+		// Assert
+		Assert.AreEqual("MyFile.g.cs", fileName);
+	}
+
 	#region Helper Methods and Test Generators
 
 	private static Compilation CreateCompilation(string source)
@@ -148,67 +171,34 @@ public sealed class IncrementalGeneratorTests
 	// Test generator implementations
 	private class TestSourceGenerator : IncrementalGenerator
 	{
-		private List<SyntaxTree> _code;
-
-		public override List<SyntaxTree> Code
+		protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 		{
-			get => _code ??= new List<SyntaxTree>
-			{
-				CSharpSyntaxTree.ParseText("public class GeneratedClass {}")
-			};
-			set => _code = value;
+			AddSource(GetGeneratedFileName("Generated_1"), "public class GeneratedClass {}");
 		}
 	}
 
 	private class TestSourceGeneratorWithCustomNames : IncrementalGenerator
 	{
-		private List<SyntaxTree> _code;
-
-		public override List<SyntaxTree> Code
+		protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 		{
-			get => _code ??= new List<SyntaxTree>
-			{
-				CSharpSyntaxTree.ParseText("public class GeneratedClass {}")
-			};
-			set => _code = value;
+			AddSource("CustomName.g.cs", "public class GeneratedClass {}");
 		}
-
-		protected override IList<string> FileNames => new List<string> { "CustomName.g.cs" };
 	}
 
 	private class TestSourceGeneratorWithMultipleFiles : IncrementalGenerator
 	{
-		private List<SyntaxTree> _code;
-
-		public override List<SyntaxTree> Code
+		protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 		{
-			get => _code ??= new List<SyntaxTree>
-		{
-			CSharpSyntaxTree.ParseText("public class GeneratedClass1 {}"),
-			CSharpSyntaxTree.ParseText("public class GeneratedClass2 {}")
-		};
-			set => _code = value;
+			AddSource("GeneratedFile1.g.cs", "public class GeneratedClass1 {}");
+			AddSource("GeneratedFile2.g.cs", "public class GeneratedClass2 {}");
 		}
-
-		// Explicitly specify file names to ensure consistency
-		protected override IList<string> FileNames => new List<string>
-	{
-		"Generated_1.g.cs",
-		"Generated_2.g.cs"
-	};
 	}
 
 	private class TestSourceGeneratorWithDiagnostics : IncrementalGenerator
 	{
-		private List<SyntaxTree> _code;
-
-		public override List<SyntaxTree> Code
+		protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 		{
-			get => _code ??= new List<SyntaxTree>
-			{
-				CSharpSyntaxTree.ParseText("public class GeneratedClass {}")
-			};
-			set => _code = value;
+			AddSource(GetGeneratedFileName("Generated_1"), "public class GeneratedClass {}");
 		}
 
 		protected override void OnAfterGeneration(SourceProductionContext context)
@@ -227,51 +217,42 @@ public sealed class IncrementalGeneratorTests
 		}
 	}
 
-	private class TestSourceGeneratorWithAdditionalSources : IncrementalGenerator
+	private class TestSourceGeneratorWithMultipleSources : IncrementalGenerator
 	{
-		private List<SyntaxTree> _code;
-		private Dictionary<string, SyntaxTree> _additionalSources;
-
-		public override List<SyntaxTree> Code
+		protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 		{
-			get => _code ??= new List<SyntaxTree>
-		{
-			CSharpSyntaxTree.ParseText("public class GeneratedClass {}")
-		};
-			set => _code = value;
+			AddSource(GetGeneratedFileName("Generated_1"), "public class GeneratedClass {}");
+			AddSource("AdditionalFile.g.cs", "public class AdditionalClass {}");
 		}
-
-		protected override Dictionary<string, SyntaxTree> AdditionalSources =>
-			_additionalSources ??= new Dictionary<string, SyntaxTree>
-			{
-				["AdditionalFile.g.cs"] = CSharpSyntaxTree.ParseText("public class AdditionalClass {}")
-			};
 	}
 
 	private class TestSourceGeneratorWithLifecycleTracking : IncrementalGenerator
 	{
-		private List<SyntaxTree> _code;
-
-		public override List<SyntaxTree> Code
-		{
-			get => _code ??= new List<SyntaxTree>
-			{
-				CSharpSyntaxTree.ParseText("public class GeneratedClass {}")
-			};
-			set => _code = value;
-		}
-
 		public bool BeforeGenerationCalled { get; private set; }
 		public bool AfterGenerationCalled { get; private set; }
 
-		protected override void OnBeforeGeneration(Compilation compilation, CancellationToken cancellationToken)
+		protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 		{
 			BeforeGenerationCalled = true;
+			AddSource(GetGeneratedFileName("Generated_1"), "public class GeneratedClass {}");
 		}
 
 		protected override void OnAfterGeneration(SourceProductionContext context)
 		{
 			AfterGenerationCalled = true;
+		}
+	}
+
+	private class TestSourceGeneratorWithContextAccess : IncrementalGenerator
+	{
+		public bool ContextWasAvailable { get; private set; }
+		public Compilation CapturedCompilation { get; private set; }
+
+		protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
+		{
+			ContextWasAvailable = context != null;
+			CapturedCompilation = context?.Compilation;
+			AddSource(GetGeneratedFileName("Generated_1"), "public class GeneratedClass {}");
 		}
 	}
 

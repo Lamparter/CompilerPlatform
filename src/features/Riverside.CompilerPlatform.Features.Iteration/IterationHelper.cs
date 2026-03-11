@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Riverside.CompilerPlatform.Features.Iteration;
+namespace Riverside.CompilerPlatform.Features;
 
 /// <summary>
 /// Provides extension methods for performing repeated actions.

@@ -6,7 +6,7 @@ on:
 
 env:
   WORKING_DIR: ${{ github.workspace }}
-  SOLUTION_PATH: '${{ github.workspace }}\Riverside.CompilerPlatform.slnx'
+  SOLUTION_PATH: '${{ github.workspace }}\CompilerPlatform.slnx'
 
 jobs:
   build:
@@ -16,12 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         configuration: [CSharp, VisualBasic]
-        project: [Analyzers, CodeFixers, HighPerformance, SourceGenerators]
+        project: [Analyzers, CodeFixers, HighPerformance, SourceGenerators, DynamicCast, Iteration]
 
     env:
       PROJECT: ${{ matrix.project }}
       CONFIGURATION: ${{ matrix.configuration }}
-      PROJECT_DIR: ${{ github.workspace }}\src\Riverside.CompilerPlatform.${{ matrix.project }}
 
     steps:
 
@@ -39,6 +38,22 @@ jobs:
     - name: Restore
       run: |
         msbuild $env:SOLUTION_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
+
+    - name: Resolve project directory
+      shell: pwsh
+      run: |
+        $roslynProjects = @('Analyzers', 'CodeFixers', 'HighPerformance', 'SourceGenerators')
+
+        if ($roslynProjects -contains '${{ matrix.project }}') {
+          $projectFolder = 'roslyn'
+          $projectPrefix = 'Riverside.CompilerPlatform'
+        }
+        else {
+          $projectFolder = 'features'
+          $projectPrefix = 'Riverside.CompilerPlatform.Features'
+        }
+
+        "PROJECT_DIR=${{ github.workspace }}\src\$projectFolder\$projectPrefix.${{ matrix.project }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Build
       run: |

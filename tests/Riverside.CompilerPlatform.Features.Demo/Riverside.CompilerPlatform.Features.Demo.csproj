@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<Configurations>VisualBasic;CSharp</Configurations>
 		<TargetFramework>netstandard2.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\features\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />
+		<!--<ProjectReference Include="..\..\src\features\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />-->
 		<ProjectReference Include="..\..\src\features\Riverside.CompilerPlatform.Features.Iteration\Riverside.CompilerPlatform.Features.Iteration.csproj" />
 	</ItemGroup>
 

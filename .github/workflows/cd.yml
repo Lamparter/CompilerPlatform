@@ -10,7 +10,7 @@ on:
 
 env:
   WORKING_DIR: ${{ github.workspace }}
-  SOLUTION_PATH: '${{ github.workspace }}\Riverside.CompilerPlatform.slnx'
+  SOLUTION_PATH: '${{ github.workspace }}\CompilerPlatform.slnx'
 
 jobs:
   publish:

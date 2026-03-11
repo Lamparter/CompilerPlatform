@@ -1,9 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace Riverside.CompilerPlatform.SourceGenerators;
@@ -16,34 +15,20 @@ namespace Riverside.CompilerPlatform.SourceGenerators;
 /// to simply provide generated code without dealing with pipeline complexity, while still
 /// providing access to advanced features when needed.
 /// </remarks>
-public abstract class IncrementalGenerator : IIncrementalGenerator
+public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableGenerator
 {
 	#region Properties
-	/// <summary>
-	/// The collection of generated source files.
-	/// </summary>
-	/// <remarks>
-	/// Each syntax tree represents a source file to be added to the compilation.
-	/// </remarks>
-	public abstract List<SyntaxTree> Code { get; set; }
+
+	public GeneratorContext Context { get; internal set; }
 
 	/// <summary>
-	/// Provides custom file names for generated source files.
+	/// Gets the collection of source texts, indexed by their unique names.
 	/// </summary>
 	/// <remarks>
-	/// Override this property to provide specific file names for your generated code.
-	/// If null, default names (<c>GeneratedFile{index}.g.cs</c>) will be used.
+	/// Each entry in the dictionary represents a named <see cref="SourceText"/>.
+	/// To add new sources, use the <see cref="AddSource(string?, SourceText)"/> method.
 	/// </remarks>
-	protected virtual IList<string> FileNames => null;
-
-	/// <summary>
-	/// Gets or sets additional syntax trees to include in the source generation.
-	/// </summary>
-	/// <remarks>
-	/// These syntax trees are processed alongside the main <see cref="Code"/> list, allowing generators
-	/// to include auxiliary files without modifying the primary <see cref="Code"/> property.
-	/// </remarks>
-	protected virtual Dictionary<string, SyntaxTree> AdditionalSources => null;
+	public Dictionary<string, SourceText> Sources { get; internal set; } = [];
 
 	/// <summary>
 	/// Gets a value indicating whether to suppress diagnostics from being reported during source generation.
@@ -56,7 +41,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 	/// <remarks>
 	/// This provides access to additional files that were passed to the compilation.
 	/// </remarks>
-	protected Dictionary<string, string> AdditionalTexts { get; } = new Dictionary<string, string>();
+	protected Dictionary<string, string> AdditionalTexts { get; } = [];
 
 	/// <summary>
 	/// Gets the parser options to use when parsing source code.
@@ -70,28 +55,33 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 	/// Gets metadata references available to the generator.
 	/// </summary>
 	protected List<MetadataReference> MetadataReferences { get; } = new List<MetadataReference>();
+
+	/// <inheritdoc/>
+	public virtual bool IsDebuggerEnabled { get => Debugger.IsAttached; private set => Debug(value); }
 	#endregion
 
 	#region Events
 	/// <summary>
 	/// Called before source generation begins.
+	/// A <see cref="GeneratorContext"/> instance is passed to this method; add new source texts here if they require real-time compilation data.
 	/// </summary>
-	/// <param name="compilation">The current compilation.</param>
+	/// <remarks>
+	/// This method is called during the generation process, and any exceptions raised will be reported to the user.
+	/// To customise this, disable <see cref="SuppressDiagnostics"/>.
+	/// </remarks>
+	/// <param name="context">The current generator context.</param>
 	/// <param name="cancellationToken">The cancellation token.</param>
-	protected virtual void OnBeforeGeneration(Compilation compilation, CancellationToken cancellationToken) { }
+	protected virtual void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken) { }
 
 	/// <summary>
 	/// Called after source generation completes.
 	/// </summary>
+	/// <remarks>
+	/// This method is called during the generation process, and any exceptions raised will be reported to the user.
+	/// To customise this, disable <see cref="SuppressDiagnostics"/>.
+	/// </remarks>
 	/// <param name="context">The source production context.</param>
 	protected virtual void OnAfterGeneration(SourceProductionContext context) { }
-
-	/// <summary>
-	/// Called when an additional file is discovered during initialization.
-	/// </summary>
-	/// <param name="filePath">The path of the additional file.</param>
-	/// <param name="content">The content of the additional file.</param>
-	protected virtual void OnAdditionalFileDiscovered(string filePath, string content) { }
 
 	/// <summary>
 	/// Called when metadata references are available.
@@ -122,11 +112,54 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 	protected virtual void CustomizeInitialization(IncrementalGeneratorInitializationContext context) { }
 
 	/// <summary>
-	/// Initializes the source generator.
+	/// Adds a source text to the collection.
 	/// </summary>
-	/// <param name="context">The initialization context provided by the Roslyn compiler.</param>
+	/// <remarks>
+	/// If the provided hint name is null, empty, or consists only of whitespace, a unique file name is generated to ensure each source is uniquely identified.
+	/// </remarks>
+	/// <param name="hintName">The optional hint name to associate with the source text. The <see cref="AddSource(string?, SourceText)"/> method does not automatically add the appropriate <c>.g.cs</c> or <c>.g.vb</c> extension, you must use <see cref="GetGeneratedFileName(string)"/></param>
+	/// <param name="text">The source text to add. Cannot be null.</param>
+	public void AddSource(string? hintName, SourceText text)
+	{
+		if (string.IsNullOrWhiteSpace(hintName))
+		{
+			hintName = GetGeneratedFileName(Guid.NewGuid().ToString());
+		}
+		Sources.Add(hintName!, text);
+	}
+
+	/// <inheritdoc cref="AddSource(string?, SourceText)" />
+	public void AddSource(string? hintName, string text)
+	{
+		AddSource(hintName, SourceText.From(text, encoding: Encoding.UTF8));
+	}
+
+	/// <inheritdoc />
+	public void Debug(bool toAttach = true)
+	{
+		if (toAttach)
+			Debugger.Launch();
+	}
+
+	// Internal implementation so other source generator implementations in this assembly can override the Initialize() method
+	internal virtual void Initialize(IncrementalGeneratorInitializationContext context, out bool cancelling)
+	{
+		cancelling = false;
+	}
+
+	/// <summary>
+	/// Initialises the source generator.
+	/// </summary>
+	/// <remarks>
+	/// This method should not be overriden, instead, override <see cref="CustomizeInitialization(IncrementalGeneratorInitializationContext)"/> for advanced customization of the generator instance.
+	/// </remarks>
+	/// <param name="context">The initialisation context provided by the Roslyn compiler.</param>
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
+		Initialize(context, out bool cancelling);
+		if (cancelling)
+			return;
+
 		// Allow advanced customization first
 		CustomizeInitialization(context);
 
@@ -139,30 +172,6 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 			OnMetadataReferencesAvailable(references);
 		});
 
-		// Register for additional files
-		IncrementalValuesProvider<(string, string)> additionalFilesProvider = context.AdditionalTextsProvider
-			.Select((text, cancellationToken) =>
-			{
-				string filePath = text.Path;
-				string content = text.GetText(cancellationToken)?.ToString() ?? string.Empty;
-				return (filePath, content);
-			});
-
-		// Process additional files
-		context.RegisterSourceOutput(
-			additionalFilesProvider,
-			(sourceContext, fileInfo) =>
-			{
-				string filePath = fileInfo.Item1;
-				string content = fileInfo.Item2;
-
-				// Store in AdditionalTexts for later use
-				AdditionalTexts[filePath] = content;
-
-				// Notify derived classes
-				OnAdditionalFileDiscovered(filePath, content);
-			});
-
 		// Set up analysis options provider
 		IncrementalValueProvider<AnalyzerConfigOptionsProvider> optionsProvider = context.AnalyzerConfigOptionsProvider;
 
@@ -174,49 +183,20 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 				Compilation compilation = tuple.Left;
 				AnalyzerConfigOptionsProvider options = tuple.Right;
 
-				// Ensure Code is not null
-				if (Code == null)
-				{
-					return;
-				}
+				Context = new(compilation, options);
 
 				try
 				{
 					// Call the before generation hook
-					OnBeforeGeneration(compilation, sourceProductionContext.CancellationToken);
+					OnBeforeGeneration(Context, sourceProductionContext.CancellationToken);
 
-					// Add each source file from the Code collection
-					for (int i = 0; i < Code.Count; i++)
+					// Add the source to the compilation
+					foreach (var entry in Sources)
 					{
-						if (Code[i] != null)
-						{
-							// Get the file name (custom or default)
-							string fileName = (FileNames != null && i < FileNames.Count)
-								? FileNames[i]
-								: GetGeneratedFileName($"Generated_{i + 1}");
-
-							// Get the source text using the customizable method
-							string sourceText = GetSourceText(Code[i]);
-
-							// Add the source to the compilation
-							sourceProductionContext.AddSource(fileName, sourceText);
-						}
+						sourceProductionContext.AddSource(entry.Key, entry.Value);
 					}
 
-					// Process additional sources if provided
-					if (AdditionalSources != null)
-					{
-						foreach (var source in AdditionalSources)
-						{
-							if (source.Value != null)
-							{
-								string sourceText = GetSourceText(source.Value);
-								sourceProductionContext.AddSource(source.Key, sourceText);
-							}
-						}
-					}
-
-					// Call the after generation hook
+					// Call the after genbberation hook
 					OnAfterGeneration(sourceProductionContext);
 				}
 				catch (Exception ex) when (ex is not OperationCanceledException)
@@ -226,7 +206,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 						// Report exceptions that occur during generation
 						sourceProductionContext.ReportDiagnostic(
 							CreateDiagnostic(
-								"GEN001",
+								$"RX9999",
 								"Source Generation Error",
 								$"An error occurred during source generation: {ex.Message}",
 								DiagnosticSeverity.Error));
@@ -251,7 +231,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 		string title,
 		string message,
 		DiagnosticSeverity severity = DiagnosticSeverity.Warning,
-		Location location = null)
+		Location? location = null)
 	{
 		return Diagnostic.Create(
 			new DiagnosticDescriptor(
@@ -332,7 +312,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator
 	/// </remarks>
 	/// <param name="value">The file name that will have the <c>.g.cs</c> or <c>.g.vb</c> extension appended to it.</param>
 	/// <returns></returns>
-	protected static string GetGeneratedFileName(string value)
+	public static string GetGeneratedFileName(string value)
 	{
 		return value + ".g." +
 #if VISUALBASIC

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="MSTest.Sdk/3.6.4">
 
 	<PropertyGroup>
+		<Configurations>CSharp</Configurations>
 		<TargetFramework>net8.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -14,6 +15,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
+		<PackageReference Include="Moq" Version="4.20.72" />
 	</ItemGroup>
 
 	<ItemGroup>

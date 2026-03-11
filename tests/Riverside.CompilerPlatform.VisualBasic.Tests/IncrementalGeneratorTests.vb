@@ -1,4 +1,4 @@
-﻿Imports System.Collections.Immutable
+Imports System.Collections.Immutable
 Imports System.Reflection
 Imports System.Threading
 Imports Microsoft.CodeAnalysis
@@ -12,7 +12,7 @@ Namespace Riverside.CompilerPlatform.VisualBasic.Tests
     Public NotInheritable Class IncrementalGeneratorTests
 
         <TestMethod>
-        Public Async Function GeneratesSourceFromCodeProperty() As Task
+        Public Async Function GeneratesSourceFromAddSourceMethod() As Task
             ' Arrange
             Dim generator As New TestSourceGenerator()
             Dim compilation = CreateCompilation("Public Class TestClass {}")
@@ -54,8 +54,8 @@ Namespace Riverside.CompilerPlatform.VisualBasic.Tests
 
             Dim fileNames = result.GeneratedTrees.Select(Function(s) s.FilePath).ToArray()
 
-            Assert.IsTrue(fileNames.Any(Function(f) f.Contains("GeneratedFile1.g.vb") OrElse f.Contains("Generated_1.g.vb")), "First generated file name not found")
-            Assert.IsTrue(fileNames.Any(Function(f) f.Contains("GeneratedFile2.g.vb") OrElse f.Contains("Generated_2.g.vb")), "Second generated file name not found")
+            Assert.IsTrue(fileNames.Any(Function(f) f.Contains("GeneratedFile1.g.vb")), "First generated file name not found")
+            Assert.IsTrue(fileNames.Any(Function(f) f.Contains("GeneratedFile2.g.vb")), "Second generated file name not found")
 
             Dim firstFile = result.GeneratedTrees.FirstOrDefault(Function(t) t.GetText().ToString().Contains("GeneratedClass1"))
             Dim secondFile = result.GeneratedTrees.FirstOrDefault(Function(t) t.GetText().ToString().Contains("GeneratedClass2"))
@@ -80,9 +80,9 @@ Namespace Riverside.CompilerPlatform.VisualBasic.Tests
         End Function
 
         <TestMethod>
-        Public Async Function SupportsAdditionalSources() As Task
+        Public Async Function SupportsMultipleSourcesViaAddSource() As Task
             ' Arrange
-            Dim generator As New TestSourceGeneratorWithAdditionalSources()
+            Dim generator As New TestSourceGeneratorWithMultipleSources()
             Dim compilation = CreateCompilation("Public Class TestClass {}")
 
             ' Act
@@ -111,6 +111,30 @@ Namespace Riverside.CompilerPlatform.VisualBasic.Tests
             Assert.IsTrue(generator.AfterGenerationCalled)
         End Function
 
+        <TestMethod>
+        Public Async Function ContextIsAvailableInLifecycleMethods() As Task
+            ' Arrange
+            Dim generator As New TestSourceGeneratorWithContextAccess()
+            Dim compilation = CreateCompilation("Public Class TestClass {}")
+
+            ' Act
+            Dim result = RunGenerator(compilation, generator)
+
+            ' Assert
+            Assert.IsTrue(generator.ContextWasAvailable)
+            Assert.IsNotNull(generator.CapturedCompilation)
+            Assert.AreEqual("compilation", generator.CapturedCompilation.AssemblyName)
+        End Function
+
+        <TestMethod>
+        Public Async Function GetGeneratedFileNameCreatesCorrectExtension() As Task
+            ' Arrange
+            Dim fileName = IncrementalGenerator.GetGeneratedFileName("MyFile")
+
+            ' Assert
+            Assert.AreEqual("MyFile.g.vb", fileName)
+        End Function
+
 #Region "Helper Methods and Test Generators"
 
         Private Shared Function CreateCompilation(source As String) As Compilation
@@ -130,82 +154,34 @@ Namespace Riverside.CompilerPlatform.VisualBasic.Tests
         Private Class TestSourceGenerator
             Inherits IncrementalGenerator
 
-            Private _code As List(Of SyntaxTree)
-
-            Public Overrides Property Code As List(Of SyntaxTree)
-                Get
-                    Return If(_code, New List(Of SyntaxTree) From {
-                        VisualBasicSyntaxTree.ParseText("Public Class GeneratedClass {}")
-                    })
-                End Get
-                Set(value As List(Of SyntaxTree))
-                    _code = value
-                End Set
-            End Property
+            Protected Overrides Sub OnBeforeGeneration(context As GeneratorContext, cancellationToken As CancellationToken)
+                AddSource(GetGeneratedFileName("Generated_1"), "Public Class GeneratedClass {}")
+            End Sub
         End Class
 
         Private Class TestSourceGeneratorWithCustomNames
             Inherits IncrementalGenerator
 
-            Private _code As List(Of SyntaxTree)
-
-            Public Overrides Property Code As List(Of SyntaxTree)
-                Get
-                    Return If(_code, New List(Of SyntaxTree) From {
-                        VisualBasicSyntaxTree.ParseText("Public Class GeneratedClass {}")
-                    })
-                End Get
-                Set(value As List(Of SyntaxTree))
-                    _code = value
-                End Set
-            End Property
-
-            Protected Overrides ReadOnly Property FileNames As IList(Of String)
-                Get
-                    Return New List(Of String) From {"CustomName.g.vb"}
-                End Get
-            End Property
+            Protected Overrides Sub OnBeforeGeneration(context As GeneratorContext, cancellationToken As CancellationToken)
+                AddSource("CustomName.g.vb", "Public Class GeneratedClass {}")
+            End Sub
         End Class
 
         Private Class TestSourceGeneratorWithMultipleFiles
             Inherits IncrementalGenerator
 
-            Private _code As List(Of SyntaxTree)
-
-            Public Overrides Property Code As List(Of SyntaxTree)
-                Get
-                    Return If(_code, New List(Of SyntaxTree) From {
-                        VisualBasicSyntaxTree.ParseText("Public Class GeneratedClass1 {}"),
-                        VisualBasicSyntaxTree.ParseText("Public Class GeneratedClass2 {}")
-                    })
-                End Get
-                Set(value As List(Of SyntaxTree))
-                    _code = value
-                End Set
-            End Property
-
-            Protected Overrides ReadOnly Property FileNames As IList(Of String)
-                Get
-                    Return New List(Of String) From {"Generated_1.g.vb", "Generated_2.g.vb"}
-                End Get
-            End Property
+            Protected Overrides Sub OnBeforeGeneration(context As GeneratorContext, cancellationToken As CancellationToken)
+                AddSource("GeneratedFile1.g.vb", "Public Class GeneratedClass1 {}")
+                AddSource("GeneratedFile2.g.vb", "Public Class GeneratedClass2 {}")
+            End Sub
         End Class
 
         Private Class TestSourceGeneratorWithDiagnostics
             Inherits IncrementalGenerator
 
-            Private _code As List(Of SyntaxTree)
-
-            Public Overrides Property Code As List(Of SyntaxTree)
-                Get
-                    Return If(_code, New List(Of SyntaxTree) From {
-                        VisualBasicSyntaxTree.ParseText("Public Class GeneratedClass {}")
-                    })
-                End Get
-                Set(value As List(Of SyntaxTree))
-                    _code = value
-                End Set
-            End Property
+            Protected Overrides Sub OnBeforeGeneration(context As GeneratorContext, cancellationToken As CancellationToken)
+                AddSource(GetGeneratedFileName("Generated_1"), "Public Class GeneratedClass {}")
+            End Sub
 
             Protected Overrides Sub OnAfterGeneration(context As SourceProductionContext)
                 Dim diag = Diagnostic.Create(
@@ -222,57 +198,41 @@ Namespace Riverside.CompilerPlatform.VisualBasic.Tests
             End Sub
         End Class
 
-        Private Class TestSourceGeneratorWithAdditionalSources
+        Private Class TestSourceGeneratorWithMultipleSources
             Inherits IncrementalGenerator
 
-            Private _code As List(Of SyntaxTree)
-            Private _additionalSources As Dictionary(Of String, SyntaxTree)
-
-            Public Overrides Property Code As List(Of SyntaxTree)
-                Get
-                    Return If(_code, New List(Of SyntaxTree) From {
-                        VisualBasicSyntaxTree.ParseText("Public Class GeneratedClass {}")
-                    })
-                End Get
-                Set(value As List(Of SyntaxTree))
-                    _code = value
-                End Set
-            End Property
-
-            Protected Overrides ReadOnly Property AdditionalSources As Dictionary(Of String, SyntaxTree)
-                Get
-                    Return If(_additionalSources, New Dictionary(Of String, SyntaxTree) From {
-                        {"AdditionalFile.g.vb", VisualBasicSyntaxTree.ParseText("Public Class AdditionalClass {}")}
-                    })
-                End Get
-            End Property
+            Protected Overrides Sub OnBeforeGeneration(context As GeneratorContext, cancellationToken As CancellationToken)
+                AddSource(GetGeneratedFileName("Generated_1"), "Public Class GeneratedClass {}")
+                AddSource("AdditionalFile.g.vb", "Public Class AdditionalClass {}")
+            End Sub
         End Class
 
         Private Class TestSourceGeneratorWithLifecycleTracking
             Inherits IncrementalGenerator
 
-            Private _code As List(Of SyntaxTree)
-
-            Public Overrides Property Code As List(Of SyntaxTree)
-                Get
-                    Return If(_code, New List(Of SyntaxTree) From {
-                        VisualBasicSyntaxTree.ParseText("Public Class GeneratedClass {}")
-                    })
-                End Get
-                Set(value As List(Of SyntaxTree))
-                    _code = value
-                End Set
-            End Property
-
             Public Property BeforeGenerationCalled As Boolean
             Public Property AfterGenerationCalled As Boolean
 
-            Protected Overrides Sub OnBeforeGeneration(compilation As Compilation, cancellationToken As CancellationToken)
+            Protected Overrides Sub OnBeforeGeneration(context As GeneratorContext, cancellationToken As CancellationToken)
                 BeforeGenerationCalled = True
+                AddSource(GetGeneratedFileName("Generated_1"), "Public Class GeneratedClass {}")
             End Sub
 
             Protected Overrides Sub OnAfterGeneration(context As SourceProductionContext)
                 AfterGenerationCalled = True
+            End Sub
+        End Class
+
+        Private Class TestSourceGeneratorWithContextAccess
+            Inherits IncrementalGenerator
+
+            Public Property ContextWasAvailable As Boolean
+            Public Property CapturedCompilation As Compilation
+
+            Protected Overrides Sub OnBeforeGeneration(context As GeneratorContext, cancellationToken As CancellationToken)
+                ContextWasAvailable = context IsNot Nothing
+                CapturedCompilation = context?.Compilation
+                AddSource(GetGeneratedFileName("Generated_1"), "Public Class GeneratedClass {}")
             End Sub
         End Class
 
