@@ -2,12 +2,7 @@
 
 namespace Riverside.CompilerPlatform.Features.DynamicCast;
 
-public class DynamicCastRewriter :
-#if CSHARP
-	CSharpSyntaxRewriter
-#elif VISUALBASIC
-	VisualBasicSyntaxRewriter
-#endif
+public class DynamicCastRewriter : CSharpSyntaxRewriter
 {
 	private readonly SemanticModel _semanticModel;
 

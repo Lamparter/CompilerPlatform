@@ -8,6 +8,8 @@
 		<ExtensionsDirectory>$(RootDirectory)\src\roslyn</ExtensionsDirectory>
 		<FeaturesDirectory>$(RootDirectory)\src\features</FeaturesDirectory>
 		<BuildDirectory>$(RootDirectory)\eng</BuildDirectory>
+
+		<PackageOutputPath>$(RootDirectory)\bin</PackageOutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup>

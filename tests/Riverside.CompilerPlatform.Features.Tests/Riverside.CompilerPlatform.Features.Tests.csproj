@@ -8,6 +8,7 @@
 	<ItemGroup>
 		<!--<ProjectReference Include="..\..\src\features\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />-->
 		<ProjectReference Include="..\..\src\features\Riverside.CompilerPlatform.Features.Iteration\Riverside.CompilerPlatform.Features.Iteration.csproj" />
+		<ProjectReference Include="..\..\src\roslyn\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" OutputItemType="Analyzer" />
 	</ItemGroup>
 
 </Project>
