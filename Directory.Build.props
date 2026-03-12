@@ -1,15 +1,15 @@
 <Project>
-	<Import Project="$(MSBuildThisFileDirectory)\eng\LanguageInternals.props" Condition="!$(MSBuildProjectName.Contains('Tests'))" />
 	<Import Project="$(MSBuildThisFileDirectory)\eng\PackageMetadata.props" Condition="!$(MSBuildProjectName.Contains('Tests'))" />
 	<Import Project="$(MSBuildThisFileDirectory)\eng\CurrentVersion.props" />
 	<PropertyGroup>
 		<RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
-		<SourceDirectory>$(RootDirectory)\src</SourceDirectory>
-		<ExtensionsDirectory>$(RootDirectory)\src\roslyn</ExtensionsDirectory>
-		<FeaturesDirectory>$(RootDirectory)\src\features</FeaturesDirectory>
-		<BuildDirectory>$(RootDirectory)\eng</BuildDirectory>
+		<SourceDirectory>$(RootDirectory)src</SourceDirectory>
+		<BuildDirectory>$(RootDirectory)eng</BuildDirectory>
 
-		<PackageOutputPath>$(RootDirectory)\bin</PackageOutputPath>
+		<ExtensionsDirectory>$(SourceDirectory)\roslyn</ExtensionsDirectory>
+		<FeaturesDirectory>$(SourceDirectory)\features</FeaturesDirectory>
+
+		<PackageOutputPath>$(RootDirectory)bin</PackageOutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -19,6 +19,8 @@
 		<LangMT Condition="'$(Configuration)' == 'CSharp' or '$(Configuration)' == 'VisualBasic'">$(Configuration)</LangMT>
 		<IsLangMT Condition="'$(LangMT)' != ''">true</IsLangMT>
 	</PropertyGroup>
+
+	<Import Project="$(MSBuildThisFileDirectory)\eng\LanguageInternals.props" Condition="!$(MSBuildProjectName.Contains('Tests'))" />
 
 	<PropertyGroup>
 		<Product>Riverside.CompilerPlatform</Product>

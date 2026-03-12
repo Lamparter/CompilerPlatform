@@ -10,11 +10,6 @@
 			<Build Solution="VisualBasic|*" Project="false" />
 			<!--<Build Solution="CSharp|*" Project="true" />-->
 		</Project>
-		<Project Path="src/features/Riverside.CompilerPlatform.Features.Iteration/Riverside.CompilerPlatform.Features.Iteration.csproj">
-			<BuildType Name="CSharp" Project="CSharp" />
-			<Build Solution="VisualBasic|*" Project="false" />
-			<!--<Build Solution="CSharp|*" Project="true" />-->
-		</Project>
 	</Folder>
 	<Folder Name="/src/roslyn/">
 		<Project Path="src/roslyn/Riverside.CompilerPlatform.Analyzers/Riverside.CompilerPlatform.Analyzers.csproj" />

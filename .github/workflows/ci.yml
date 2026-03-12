@@ -16,12 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         configuration: [CSharp, VisualBasic]
-        project: [Analyzers, CodeFixers, HighPerformance, SourceGenerators, DynamicCast, Iteration]
+        project: [Analyzers, CodeFixers, HighPerformance, SourceGenerators, DynamicCast]
         exclude:
           - configuration: VisualBasic
             project: DynamicCast
-          - configuration: VisualBasic
-            project: Iteration
 
     env:
       PROJECT: ${{ matrix.project }}
