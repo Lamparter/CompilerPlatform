@@ -190,7 +190,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 						sourceProductionContext.AddSource(entry.Key, entry.Value);
 					}
 
-					// Call the after genbberation hook
+					// Call the after generation hook
 					OnAfterGeneration(sourceProductionContext);
 				}
 				catch (Exception ex) when (ex is not OperationCanceledException)
