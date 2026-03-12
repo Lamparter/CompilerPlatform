@@ -99,4 +99,4 @@ jobs:
 
     - name: Test
       run: |
-        dotnet test $env:PROJECT_DIR --configuration Release --no-build
+        dotnet test $env:PROJECT_DIR --configuration $env:CONFIGURATION --no-build
