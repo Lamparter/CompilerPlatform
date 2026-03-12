@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Riverside.CompilerPlatform.SourceGenerators;
+﻿namespace Riverside.CompilerPlatform.SourceGenerators;
 
 /// <summary>
 /// Represents a source generator that provides additional debugging capabilities during incremental code generation.

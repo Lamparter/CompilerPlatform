@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Riverside.Extensions.Accountability;
+﻿using Riverside.Extensions.Accountability;
 using System;
 using System.Collections.Generic;
 using System.Linq;

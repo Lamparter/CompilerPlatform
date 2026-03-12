@@ -1,8 +1,5 @@
 ﻿#if CSHARP
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Riverside.Extensions.Accountability;
 using System;
 using System.Collections.Generic;

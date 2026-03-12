@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Riverside.CompilerPlatform.SourceGenerators;
+﻿using Riverside.CompilerPlatform.SourceGenerators;
 using System.Reflection;
 
 namespace Riverside.CompilerPlatform.CSharp.Tests;

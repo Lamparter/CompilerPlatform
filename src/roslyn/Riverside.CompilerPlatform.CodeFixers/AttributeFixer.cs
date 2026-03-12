@@ -1,9 +1,6 @@
 ﻿#if CSHARP // This API is not available in Visual Basic
 
-using Microsoft.CodeAnalysis.Text;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Riverside.CompilerPlatform.CodeFixers;
 

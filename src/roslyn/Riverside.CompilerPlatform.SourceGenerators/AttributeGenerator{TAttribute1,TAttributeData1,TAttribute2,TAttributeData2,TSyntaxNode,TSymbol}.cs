@@ -1,7 +1,5 @@
 #if CSHARP // Visual Basic implementation is not available yet
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Riverside.CompilerPlatform.SourceGenerators.Extensions;
 using Riverside.Extensions.Accountability;
 using System;

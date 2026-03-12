@@ -10,6 +10,13 @@
 /// <param name="options">The analyser configuration options provider, supplying additional context and settings for the generator.</param>
 public class GeneratorContext(Compilation compilation, AnalyzerConfigOptionsProvider options)
 {
+	/// <summary>
+	/// Gets the current compilation associated with this instance.
+	/// </summary>
 	public Compilation Compilation { get; } = compilation;
+
+	/// <summary>
+	/// Gets the set of analyser configuration options associated with this provider, e.g. the local <c>.editorconfig</c> file.
+	/// </summary>
 	public AnalyzerConfigOptionsProvider Options { get; } = options;
 }

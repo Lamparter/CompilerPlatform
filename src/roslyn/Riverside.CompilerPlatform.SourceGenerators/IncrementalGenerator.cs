@@ -11,16 +11,11 @@ namespace Riverside.CompilerPlatform.SourceGenerators;
 /// An incremental generator that simplifies source generation while providing full access to <see cref="IIncrementalGenerator"/> capabilities.
 /// </summary>
 /// <remarks>
-/// This class abstracts over the Roslyn <see cref="IIncrementalGenerator"/> APIs, allowing derived classes
-/// to simply provide generated code without dealing with pipeline complexity, while still
-/// providing access to advanced features when needed.
+/// This class abstracts over the Roslyn <see cref="IIncrementalGenerator"/> APIs, allowing derived classes to simply provide generated code without dealing with pipeline complexity, while still providing access to advanced features when needed.
 /// </remarks>
 public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableGenerator
 {
 	#region Properties
-
-	public GeneratorContext Context { get; internal set; }
-
 	/// <summary>
 	/// Gets the collection of source texts, indexed by their unique names.
 	/// </summary>
@@ -31,25 +26,17 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 	public Dictionary<string, SourceText> Sources { get; internal set; } = [];
 
 	/// <summary>
+	/// Gets or sets the generator context associated with the current operation.
+	/// </summary>
+	/// <remarks>
+	/// The <see cref="Context"/> instance is only instantiated right before source generation, so sources that rely on it must be generated via <see cref="OnBeforeGeneration(GeneratorContext, CancellationToken)"/> where <see cref="Context"/> is guaranteed.
+	/// </remarks>
+	public GeneratorContext? Context { get; internal set; }
+
+	/// <summary>
 	/// Gets a value indicating whether to suppress diagnostics from being reported during source generation.
 	/// </summary>
 	protected virtual bool SuppressDiagnostics => false;
-
-	/// <summary>
-	/// Gets a collection of additional texts available to the generator.
-	/// </summary>
-	/// <remarks>
-	/// This provides access to additional files that were passed to the compilation.
-	/// </remarks>
-	protected Dictionary<string, string> AdditionalTexts { get; } = [];
-
-	/// <summary>
-	/// Gets the parser options to use when parsing source code.
-	/// </summary>
-	/// <remarks>
-	/// Override this property to customize the parser options used for syntax tree creation.
-	/// </remarks>
-	protected virtual ParseOptions ParserOptions => null;
 
 	/// <summary>
 	/// Gets metadata references available to the generator.
@@ -91,7 +78,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 	#endregion
 
 	/// <summary>
-	/// Customizes how a syntax tree is converted to source text.
+	/// Customises how a syntax tree is converted to source text.
 	/// </summary>
 	/// <param name="syntaxTree">The syntax tree to convert.</param>
 	/// <returns>The source text representation.</returns>
@@ -108,7 +95,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 	/// Override this method to add custom pipeline stages or transformations.
 	/// This is called before the standard pipeline is set up, allowing for advanced customization.
 	/// </remarks>
-	/// <param name="context">The initialization context.</param>
+	/// <param name="context">The initialisation context.</param>
 	protected virtual void CustomizeInitialization(IncrementalGeneratorInitializationContext context) { }
 
 	/// <summary>
@@ -117,14 +104,21 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 	/// <remarks>
 	/// If the provided hint name is null, empty, or consists only of whitespace, a unique file name is generated to ensure each source is uniquely identified.
 	/// </remarks>
-	/// <param name="hintName">The optional hint name to associate with the source text. The <see cref="AddSource(string?, SourceText)"/> method does not automatically add the appropriate <c>.g.cs</c> or <c>.g.vb</c> extension, you must use <see cref="GetGeneratedFileName(string)"/></param>
-	/// <param name="text">The source text to add. Cannot be null.</param>
+	/// <param name="hintName">The optional hint name to associate with the source text.</param>
+	/// <param name="text">The source text to add.</param>
 	public void AddSource(string? hintName, SourceText text)
 	{
 		if (string.IsNullOrWhiteSpace(hintName))
 		{
 			hintName = GetGeneratedFileName(Guid.NewGuid().ToString());
 		}
+
+		hintName =
+			hintName!.EndsWith(".vb", StringComparison.OrdinalIgnoreCase) ||
+			hintName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
+				? hintName
+				: GetGeneratedFileName(hintName);
+
 		Sources.Add(hintName!, text);
 	}
 

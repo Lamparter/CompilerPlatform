@@ -5,6 +5,16 @@ using System.Linq;
 namespace Riverside.CompilerPlatform.SourceGenerators;
 
 // Not yet ready for production in any way
+
+/// <summary>
+/// Provides a base class for implementing incremental source generators that produce and manage collections of
+/// generated source files.
+/// </summary>
+/// <remarks>
+/// This generator type is simple and easy to use, just like its parent <see cref="IncrementalGenerator"/>.
+/// The most significant difference between both generator types is that this one makes the source generation process <i>even simpler</i> by abstracting the way context and source generation is handled.
+/// However, this results in a lot less freedom with what can be built with <see cref="SimpleGenerator"/> compared to <see cref="IncrementalGenerator"/>.
+/// </remarks>
 public abstract class SimpleGenerator : IncrementalGenerator
 {
 	/// <summary>
@@ -14,7 +24,6 @@ public abstract class SimpleGenerator : IncrementalGenerator
 	/// Each syntax tree represents a source file to be added to the compilation.
 	/// </remarks>
 	public abstract List<SyntaxTree> Code { get; set; }
-
 
 	/// <summary>
 	/// Provides custom file names for generated source files.
@@ -33,6 +42,22 @@ public abstract class SimpleGenerator : IncrementalGenerator
 	/// to include auxiliary files without modifying the primary <see cref="Code"/> property.
 	/// </remarks>
 	protected virtual Dictionary<string, SyntaxTree> AdditionalSources => null;
+
+	/// <summary>
+	/// Gets a collection of additional texts available to the generator.
+	/// </summary>
+	/// <remarks>
+	/// This provides access to additional files that were passed to the compilation.
+	/// </remarks>
+	protected Dictionary<string, string> AdditionalTexts { get; } = [];
+
+	/// <summary>
+	/// Gets the parser options to use when parsing source code.
+	/// </summary>
+	/// <remarks>
+	/// Override this property to customise the parser options used for syntax tree creation.
+	/// </remarks>
+	protected virtual ParseOptions ParserOptions => null;
 
 	/// <summary>
 	/// Called when an additional file is discovered during initialization.
@@ -89,6 +114,8 @@ public abstract class SimpleGenerator : IncrementalGenerator
 			{
 				Compilation compilation = tuple.Left;
 				AnalyzerConfigOptionsProvider options = tuple.Right;
+
+				Context = new(compilation, options);
 
 				// Ensure Code is not null
 				if (Code == null)

@@ -1,9 +1,5 @@
 ﻿#if CSHARP // This API is not available in Visual Basic
 
-using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

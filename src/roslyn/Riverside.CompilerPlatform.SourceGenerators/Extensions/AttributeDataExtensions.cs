@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Riverside.Extensions.Accountability;
+﻿using Riverside.Extensions.Accountability;
 using System;
 
 namespace Riverside.CompilerPlatform.SourceGenerators.Extensions;
