@@ -43,6 +43,14 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 	/// </summary>
 	protected List<MetadataReference> MetadataReferences { get; } = new List<MetadataReference>();
 
+	/// <summary>
+	/// Gets a collection of additional texts available to the generator.
+	/// </summary>
+	/// <remarks>
+	/// This provides access to additional files that were passed to the compilation.
+	/// </remarks>
+	protected Dictionary<string, string> AdditionalTexts { get; } = [];
+
 	/// <inheritdoc/>
 	public virtual bool IsDebuggerEnabled { get => Debugger.IsAttached; private set => Debug(value); }
 	#endregion
@@ -75,6 +83,13 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 	/// </summary>
 	/// <param name="references">The metadata references collection.</param>
 	protected virtual void OnMetadataReferencesAvailable(IReadOnlyList<MetadataReference> references) { }
+
+	/// <summary>
+	/// Called when an additional file is discovered during initialisation.
+	/// </summary>
+	/// <param name="filePath">The path of the additional file.</param>
+	/// <param name="content">The content of the additional file.</param>
+	protected virtual void OnAdditionalFileDiscovered(string filePath, string content) { }
 	#endregion
 
 	/// <summary>
@@ -89,11 +104,11 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 
 	#region Wrappers
 	/// <summary>
-	/// Provides an opportunity for derived classes to customize the initialization pipeline.
+	/// Provides an opportunity for derived classes to customize the initialisation pipeline.
 	/// </summary>
 	/// <remarks>
 	/// Override this method to add custom pipeline stages or transformations.
-	/// This is called before the standard pipeline is set up, allowing for advanced customization.
+	/// This is called before the standard pipeline is set up, allowing for advanced customisation.
 	/// </remarks>
 	/// <param name="context">The initialisation context.</param>
 	protected virtual void CustomizeInitialization(IncrementalGeneratorInitializationContext context) { }
@@ -145,7 +160,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 	/// Initialises the source generator.
 	/// </summary>
 	/// <remarks>
-	/// This method should not be overriden, instead, override <see cref="CustomizeInitialization(IncrementalGeneratorInitializationContext)"/> for advanced customization of the generator instance.
+	/// This method should not be overriden, instead, override <see cref="CustomizeInitialization(IncrementalGeneratorInitializationContext)"/> for advanced customisation of the generator instance.
 	/// </remarks>
 	/// <param name="context">The initialisation context provided by the Roslyn compiler.</param>
 	public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -153,8 +168,6 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 		Initialize(context, out bool cancelling);
 		if (cancelling)
 			return;
-
-		// Allow advanced customization first
 		CustomizeInitialization(context);
 
 		// Register for metadata references
@@ -166,18 +179,56 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 			OnMetadataReferencesAvailable(references);
 		});
 
-		// Set up analysis options provider
-		IncrementalValueProvider<AnalyzerConfigOptionsProvider> optionsProvider = context.AnalyzerConfigOptionsProvider;
+		// Register for additional files
+		IncrementalValuesProvider<(string, string)> additionalFilesProvider = context.AdditionalTextsProvider
+			.Select((text, cancellationToken) =>
+			{
+				string filePath = text.Path;
+				string content = text.GetText(cancellationToken)?.ToString() ?? string.Empty;
+				return (filePath, content);
+			});
+
+		// Process additional files
+		context.RegisterSourceOutput(
+			additionalFilesProvider,
+			(sourceContext, fileInfo) =>
+			{
+				string filePath = fileInfo.Item1;
+				string content = fileInfo.Item2;
+
+				// Store in AdditionalTexts for later use
+				AdditionalTexts[filePath] = content;
+
+				// Notify derived classes
+				OnAdditionalFileDiscovered(filePath, content);
+			});
+
+		var optionsProvider = context.AnalyzerConfigOptionsProvider;
+		var compilationProvider = context.CompilationProvider;
+		var syntaxProvider = context.SyntaxProvider;
+		var additionalTexts = context.AdditionalTextsProvider.Collect();
+		var parseOptionsProvider = context.ParseOptionsProvider;
+
+		var combined =
+			optionsProvider
+				.Combine(compilationProvider)
+				.Combine(additionalTexts)
+				.Combine(parseOptionsProvider)
+				.Select((nested, _) =>
+					new GeneratorContext(
+						analyzerConfigOptions: nested.Left.Left.Left,
+						compilation: nested.Left.Left.Right,
+						syntax: syntaxProvider,
+						text: nested.Left.Right,
+						parseOptions: nested.Right));
 
 		// Register main source generation pipeline
 		context.RegisterSourceOutput(
-			context.CompilationProvider.Combine(optionsProvider),
-			(sourceProductionContext, tuple) =>
+			combined,
+			(sourceProductionContext, semanticContext) =>
 			{
-				Compilation compilation = tuple.Left;
-				AnalyzerConfigOptionsProvider options = tuple.Right;
-
-				Context = new(compilation, options);
+				Context = semanticContext;
+				Context.SourceProductionContext = sourceProductionContext;
 
 				try
 				{
@@ -224,7 +275,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 		string id,
 		string title,
 		string message,
-		DiagnosticSeverity severity = DiagnosticSeverity.Warning,
+		DiagnosticSeverity severity = DiagnosticSeverity.Error,
 		Location? location = null)
 	{
 		return Diagnostic.Create(
