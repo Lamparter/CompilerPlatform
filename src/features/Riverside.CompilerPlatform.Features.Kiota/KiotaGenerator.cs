@@ -1,6 +1,6 @@
-﻿using Riverside.CompilerPlatform.SourceGenerators;
-using Riverside.CompilerPlatform.Extensions;
+﻿using Riverside.CompilerPlatform.Extensions;
 using Riverside.CompilerPlatform.Helpers;
+using Riverside.CompilerPlatform.SourceGenerators;
 using System;
 using System.Collections.Immutable;
 using System.IO;

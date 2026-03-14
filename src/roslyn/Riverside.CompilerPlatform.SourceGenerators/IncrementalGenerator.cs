@@ -250,11 +250,11 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 					if (!SuppressDiagnostics)
 					{
 						// Report exceptions that occur during generation
-							CreateDiagnostic(
-								$"RS9999",
-								"Source Generation Error",
-								$"An error occurred during source generation: {ex.Message}",
-								DiagnosticSeverity.Error).Report(Context);
+						CreateDiagnostic(
+							$"RS9999",
+							"Source Generation Error",
+							$"An error occurred during source generation: {ex.Message}",
+							DiagnosticSeverity.Error).Report(Context);
 					}
 				}
 			});
