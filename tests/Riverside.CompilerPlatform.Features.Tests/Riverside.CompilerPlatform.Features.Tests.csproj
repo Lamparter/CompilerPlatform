@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Configurations>VisualBasic;CSharp</Configurations>
@@ -18,9 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Kiota.Authentication.Azure" Version="1.21.2" />
-		<PackageReference Include="Microsoft.Kiota.Bundle" Version="1.21.2" />
-		<PackageReference Include="Riverside.CompilerPlatform.CSharp.Features.Kiota" Version="1.5.1" PrivateAssets="all" />
+		<PackageReference Include="Riverside.CompilerPlatform.CSharp.Features.Kiota" Version="1.5.0" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
