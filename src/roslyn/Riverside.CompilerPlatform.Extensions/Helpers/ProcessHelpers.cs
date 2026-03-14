@@ -3,13 +3,37 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Riverside.CompilerPlatform.Features.Swagger.Helpers;
+namespace Riverside.CompilerPlatform.Helpers;
 
 /// <summary>
 /// Provides helper methods for running external processes and capturing their output and exit codes.
 /// </summary>
 public static class ProcessHelpers
 {
+	/// <summary>
+	/// Represents the result of a process execution, including the exit code and captured output streams.
+	/// </summary>
+	/// <param name="code">The exit code returned by the process.</param>
+	/// <param name="stdout">The text output written to the standard output stream by the process.</param>
+	/// <param name="stderr">The text output written to the standard error stream by the process.</param>
+	public class ProcessOutput(int code, string stdout, string stderr)
+	{
+		/// <summary>
+		/// Gets the exit code returned by the process after it has finished executing.
+		/// </summary>
+		public int ExitCode { get; internal set; } = code;
+
+		/// <summary>
+		/// Gets the captured standard output produced by the process.
+		/// </summary>
+		public string StandardOutput { get; internal set; } = stdout;
+
+		/// <summary>
+		/// Gets the standard error output captured from the executed process.
+		/// </summary>
+		public string StandardError { get; internal set; } = stderr;
+	}
+
 	/// <summary>
 	/// Runs an external process asynchronously with the specified arguments and timeout, capturing its exit code, standard output, and standard error.
 	/// </summary>
@@ -25,7 +49,7 @@ public static class ProcessHelpers
 	/// A tuple containing the process exit code, the captured standard output, and the captured standard error.
 	/// If the process times out, the exit code is <c>-1</c> and the standard error includes a timeout message.
 	/// </returns>
-	public static async Task<(int ExitCode, string StandardOutput, string StandardError)>
+	public static async Task<ProcessOutput>
 		RunProcess(string fileName, string arguments, TimeSpan timeout)
 	{
 		var psi = new ProcessStartInfo
@@ -53,9 +77,9 @@ public static class ProcessHelpers
 		if (!exited)
 		{
 			try { proc.Kill(); } catch { }
-			return (-1, outputSb.ToString(), errorSb.AppendLine("Process timed out").ToString());
+			return new(-1, outputSb.ToString(), errorSb.AppendLine("Process timed out").ToString());
 		}
 
-		return (proc.ExitCode, outputSb.ToString(), errorSb.ToString());
+		return new(proc.ExitCode, outputSb.ToString(), errorSb.ToString());
 	}
 }

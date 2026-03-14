@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Riverside.CompilerPlatform.Features.Swagger.Helpers;
+namespace Riverside.CompilerPlatform.Helpers;
 
 /// <summary>
 /// Provides utility methods for sanitising and escaping strings for safe use in file names and command-line arguments.

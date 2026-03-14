@@ -6,9 +6,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!--<ProjectReference Include="..\..\src\features\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />-->
-		<ProjectReference Include="..\..\src\features\Riverside.CompilerPlatform.Features.Swagger\Riverside.CompilerPlatform.Features.Swagger.csproj" OutputItemType="Analyzer" />
-		<ProjectReference Include="..\..\src\roslyn\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" OutputItemType="Analyzer" />
+		<!--<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />-->
+		<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.Swagger\Riverside.CompilerPlatform.Features.Swagger.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" OutputItemType="Analyzer" />
 	</ItemGroup>
 
 	<ItemGroup>

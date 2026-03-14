@@ -1,6 +1,6 @@
 #if CSHARP // Visual Basic implementation is not available yet
 
-using Riverside.CompilerPlatform.SourceGenerators.Extensions;
+using Riverside.CompilerPlatform.Extensions;
 using Riverside.Extensions.Accountability;
 using System;
 using System.Collections.Generic;

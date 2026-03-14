@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         configuration: [CSharp, VisualBasic]
-        project: [Analyzers, CodeFixers, HighPerformance, SourceGenerators, DynamicCast, Swagger]
+        project: [Analyzers, CodeFixers, Extensions, HighPerformance, SourceGenerators, DynamicCast, Swagger]
         exclude:
           - configuration: VisualBasic
             project: DynamicCast

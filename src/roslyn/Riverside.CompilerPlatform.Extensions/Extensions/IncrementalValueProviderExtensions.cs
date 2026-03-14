@@ -1,9 +1,10 @@
-﻿using Riverside.Extensions.Accountability;
+﻿using Riverside.CompilerPlatform.Extensions;
+using Riverside.Extensions.Accountability;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Riverside.CompilerPlatform.SourceGenerators.Extensions;
+namespace Riverside.CompilerPlatform.Extensions;
 
 /// <summary>
 /// Provides extension methods for working with <see cref="IncrementalValueProvider{T}"/>.

@@ -7,6 +7,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" />
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.Extensions\Riverside.CompilerPlatform.Extensions.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

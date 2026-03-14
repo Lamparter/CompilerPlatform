@@ -17,6 +17,7 @@
 	<Folder Name="/src/roslyn/">
 		<Project Path="src/roslyn/Riverside.CompilerPlatform.Analyzers/Riverside.CompilerPlatform.Analyzers.csproj" />
 		<Project Path="src/roslyn/Riverside.CompilerPlatform.CodeFixers/Riverside.CompilerPlatform.CodeFixers.csproj" />
+		<Project Path="src/roslyn/Riverside.CompilerPlatform.Extensions/Riverside.CompilerPlatform.Extensions.csproj" />
 		<Project Path="src/roslyn/Riverside.CompilerPlatform.HighPerformance/Riverside.CompilerPlatform.HighPerformance.csproj" />
 		<Project Path="src/roslyn/Riverside.CompilerPlatform.SourceGenerators/Riverside.CompilerPlatform.SourceGenerators.csproj" />
 	</Folder>

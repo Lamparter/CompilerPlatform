@@ -5,12 +5,8 @@ using System.Linq;
 using System.Collections.Immutable;
 using System.IO;
 using System.Text;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using Riverside.CompilerPlatform.SourceGenerators.Extensions;
-using Riverside.Extensions.Accountability;
-using Riverside.CompilerPlatform.Features.Swagger.Helpers;
+using Riverside.CompilerPlatform.Extensions;
+using Riverside.CompilerPlatform.Helpers;
 
 namespace Riverside.CompilerPlatform.Features.Swagger;
 
@@ -18,12 +14,12 @@ namespace Riverside.CompilerPlatform.Features.Swagger;
 /// Generates source code from OpenAPI specification files as part of the build process.
 /// </summary>
 [Generator]
-public partial class SwaggerGenerator : IncrementalGenerator
+public partial class KiotaGenerator : IncrementalGenerator
 {
-	private const string VersionProperty = "build_property.SwaggerGenerator_Version";
-	private const string OptionsProperty = "build_property.SwaggerGenerator_Options";
-	private const string LanguageProperty = "build_property.SwaggerGenerator_Language";
-	private const string AdditionalPropertiesProperty = "build_property.SwaggerGenerator_AdditionalProperties";
+	private const string VersionProperty = "build_property.KiotaGenerator_Version";
+	private const string OptionsProperty = "build_property.KiotaGenerator_Options";
+	private const string LanguageProperty = "build_property.KiotaGenerator_Language";
+	private const string AdditionalPropertiesProperty = "build_property.KiotaGenerator_AdditionalProperties";
 
 	/// <inheritdoc/>
 	protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
@@ -42,10 +38,10 @@ public partial class SwaggerGenerator : IncrementalGenerator
 		optionsProvider.TryGetValue(LanguageProperty, out var language);
 		optionsProvider.TryGetValue(AdditionalPropertiesProperty, out var additionalProps);
 
-		version ??= "7.20.0";
+		version ??= string.Empty;
 		language ??= "csharp";
 
-		var jarPath = EnsureJarDownloaded(version, context);
+		var jarPath = EnsureToolInstallation(version, context);
 
 		if (string.IsNullOrWhiteSpace(jarPath))
 		{
@@ -61,7 +57,6 @@ public partial class SwaggerGenerator : IncrementalGenerator
 			try
 			{
 				var specNamespace = SanitizationHelpers.Sanitize(Path.GetFileNameWithoutExtension(Path.GetFileName(spec.Path)));
-				additionalProps ??= $"packageName={specNamespace},apiName=generichost,targetFramework=netstandard2.0,nullableReferenceTypes=true,useCompareNetObjects=true,equatable=true,netCoreProjectFile=true";
 
 				var specPath = spec.Path;
 				if (!File.Exists(specPath))
@@ -71,17 +66,6 @@ public partial class SwaggerGenerator : IncrementalGenerator
 
 				var tempOut = Path.Combine(Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET", Guid.NewGuid().ToString("N"));
 				Directory.CreateDirectory(tempOut);
-
-				var argsBuilder = new StringBuilder();
-				argsBuilder.Append(" -jar ");
-				argsBuilder.Append(SanitizationHelpers.EscapeArg(jarPath!));
-				argsBuilder.Append(" generate");
-				argsBuilder.Append(" -i ");
-				argsBuilder.Append(SanitizationHelpers.EscapeArg(specPath));
-				argsBuilder.Append(" -g ");
-				argsBuilder.Append(SanitizationHelpers.EscapeArg(language));
-				argsBuilder.Append(" -o ");
-				argsBuilder.Append(SanitizationHelpers.EscapeArg(tempOut));
 
 				if (!string.IsNullOrWhiteSpace(cliOptions))
 				{
@@ -144,23 +128,16 @@ public partial class SwaggerGenerator : IncrementalGenerator
 		}
 	}
 
-	private static string? EnsureJarDownloaded(string version, GeneratorContext context)
+	private static string? EnsureToolInstallation(string version, GeneratorContext context)
 	{
 		try
 		{
-			var baseDir = Path.Combine(Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET", "SwaggerGenerator");
+			var baseDir = Path.Combine(Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET", "KiotaGenerator");
 			Directory.CreateDirectory(baseDir);
 
 			var jarPath = Path.Combine(baseDir, $"openapi-generator-cli-{version}.jar");
 			if (File.Exists(jarPath))
 				return jarPath;
-
-			var url = $"https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/{version}/openapi-generator-cli-{version}.jar";
-
-			using var client = new HttpClient();
-			var bytes = client.GetByteArrayAsync(url).GetAwaiter().GetResult();
-
-			File.WriteAllBytes(jarPath, bytes);
 
 			return jarPath;
 		}

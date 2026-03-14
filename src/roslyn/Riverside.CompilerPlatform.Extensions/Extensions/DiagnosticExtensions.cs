@@ -1,4 +1,6 @@
-﻿namespace Riverside.CompilerPlatform.SourceGenerators.Extensions;
+﻿using Riverside.CompilerPlatform.SourceGenerators;
+
+namespace Riverside.CompilerPlatform.Extensions;
 
 /// <summary>
 /// Provides extension methods for reporting diagnostics within source generators.

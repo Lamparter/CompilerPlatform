@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Riverside.CompilerPlatform.SourceGenerators.Extensions;
+namespace Riverside.CompilerPlatform.Extensions;
 
 /// <summary>
 /// Provides extension methods for working with <see cref="IEnumerable{T}"/>.

@@ -1,7 +1,7 @@
 ﻿using Riverside.Extensions.Accountability;
 using System;
 
-namespace Riverside.CompilerPlatform.SourceGenerators.Extensions;
+namespace Riverside.CompilerPlatform.Extensions;
 
 /// <summary>
 /// Provides extension methods for working with <see cref="AttributeData"/>.

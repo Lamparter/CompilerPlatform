@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Riverside.CompilerPlatform.SourceGenerators.Extensions;
+namespace Riverside.CompilerPlatform.Extensions;
 
 /// <summary>
 /// Provides extension methods for various types.
