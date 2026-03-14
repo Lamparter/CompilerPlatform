@@ -9,7 +9,7 @@
 			<BuildType Project="CSharp" />
 			<Build Solution="VisualBasic|*" Project="false" />
 		</Project>
-		<Project Path="src/features/Riverside.CompilerPlatform.Features.Kiota/Riverside.CompilerPlatform.Features.Kiota.csproj" Id="ba9bb2cd-6a93-4e05-9e46-4917360831a2">
+		<Project Path="src/features/Riverside.CompilerPlatform.Features.Kiota/Riverside.CompilerPlatform.Features.Kiota.csproj">
 			<BuildType Project="CSharp" />
 			<Build Solution="VisualBasic|*" Project="false" />
 		</Project>
@@ -26,7 +26,7 @@
 			<BuildType Project="CSharp" />
 			<Build Solution="VisualBasic|*" Project="false" />
 		</Project>
-		<Project Path="tests/Riverside.CompilerPlatform.Features.Tests/Riverside.CompilerPlatform.Features.Tests.csproj" Id="198c5333-faf0-4f00-b4ed-f714bb5309c9" />
+		<Project Path="tests/Riverside.CompilerPlatform.Features.Tests/Riverside.CompilerPlatform.Features.Tests.csproj" />
 		<Project Path="tests/Riverside.CompilerPlatform.VisualBasic.Tests/Riverside.CompilerPlatform.VisualBasic.Tests.vbproj">
 			<BuildType Project="VisualBasic" />
 			<Build Solution="CSharp|*" Project="false" />
