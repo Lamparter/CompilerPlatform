@@ -47,7 +47,7 @@ jobs:
     - name: Resolve project directory
       shell: pwsh
       run: |
-        $roslynProjects = @('Analyzers', 'CodeFixers', 'HighPerformance', 'SourceGenerators')
+        $roslynProjects = @('Analyzers', 'CodeFixers', 'Extensions', 'HighPerformance', 'SourceGenerators')
 
         if ($roslynProjects -contains '${{ matrix.project }}') {
           $projectFolder = 'roslyn'
