@@ -1,4 +1,4 @@
-﻿using Riverside.CompilerPlatform.SourceGenerators;
+using Riverside.CompilerPlatform.SourceGenerators;
 using System.Threading;
 using System;
 using System.Linq;
@@ -16,10 +16,27 @@ namespace Riverside.CompilerPlatform.Features.Swagger;
 [Generator]
 public partial class KiotaGenerator : IncrementalGenerator
 {
-	private const string VersionProperty = "build_property.KiotaGenerator_Version";
-	private const string OptionsProperty = "build_property.KiotaGenerator_Options";
+	private const string VersionProperty = "build_property.Kiota_Version";
 	private const string LanguageProperty = "build_property.KiotaGenerator_Language";
-	private const string AdditionalPropertiesProperty = "build_property.KiotaGenerator_AdditionalProperties";
+	private const string ClassNameProperty = "build_property.KiotaGenerator_ClassName";
+	private const string NamespaceNameProperty = "build_property.KiotaGenerator_NamespaceName";
+	private const string TypeAccessModifierProperty = "build_property.KiotaGenerator_TypeAccessModifier";
+	private const string LogLevelProperty = "build_property.KiotaGenerator_LogLevel";
+	private const string BackingStoreProperty = "build_property.KiotaGenerator_BackingStore";
+	private const string ExcludeBackwardCompatibleProperty = "build_property.KiotaGenerator_ExcludeBackwardCompatible";
+	private const string AdditionalDataProperty = "build_property.KiotaGenerator_AdditionalData";
+	private const string SerializerProperty = "build_property.KiotaGenerator_Serializer";
+	private const string DeserializerProperty = "build_property.KiotaGenerator_Deserializer";
+	private const string CleanOutputProperty = "build_property.KiotaGenerator_CleanOutput";
+	private const string StructuredMimeTypesProperty = "build_property.KiotaGenerator_StructuredMimeTypes";
+	private const string IncludePathProperty = "build_property.KiotaGenerator_IncludePath";
+	private const string ExcludePathProperty = "build_property.KiotaGenerator_ExcludePath";
+	private const string DisableValidationRulesProperty = "build_property.KiotaGenerator_DisableValidationRules";
+	private const string ClearCacheProperty = "build_property.KiotaGenerator_ClearCache";
+	private const string DisableSSLValidationProperty = "build_property.KiotaGenerator_DisableSSLValidation";
+
+	private static readonly string ToolDirectory = Path.Combine(
+		Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET", "KiotaGenerator");
 
 	/// <inheritdoc/>
 	protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
