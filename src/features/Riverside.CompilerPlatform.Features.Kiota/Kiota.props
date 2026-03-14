@@ -1,0 +1,67 @@
+<Project>
+
+	<PropertyGroup>
+		<Kiota_MinLangVersion>7.3</Kiota_MinLangVersion>
+		<Kiota_AuthPackageVersion>1.21.2</Kiota_AuthPackageVersion>
+		<Kiota_BundlePackageVersion>1.21.2</Kiota_BundlePackageVersion>
+	</PropertyGroup>
+
+	<!--<Target Name="Kiota_EnsureDependencies" BeforeTargets="CollectPackageReferences">
+		<ItemGroup>
+			<PackageReference
+				Include="Microsoft.Kiota.Authentication.Azure"
+				Version="$(Kiota_AuthPackageVersion)"
+				Condition="'@(PackageReference->WithMetadataValue('Identity', 'Microsoft.Kiota.Authentication.Azure'))' == ''" />
+			<PackageReference
+				Include="Microsoft.Kiota.Bundle"
+				Version="$(Kiota_BundlePackageVersion)"
+				Condition="'@(PackageReference->WithMetadataValue('Identity', 'Microsoft.Kiota.Bundle'))' == ''" />
+		</ItemGroup>
+	</Target>-->
+
+	<Target Name="Kiota_ValidateLanguageAndFramework" BeforeTargets="CoreCompile">
+		<ItemGroup>
+			<_Kiota_TargetFramework Include="$(TargetFramework)" Condition="'$(TargetFramework)' != ''" />
+			<_Kiota_TargetFramework Include="$(TargetFrameworks)" Condition="'$(TargetFrameworks)' != ''" />
+			<_Kiota_InvalidFramework Include="@(_Kiota_TargetFramework)"
+				Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)', '^netstandard2\.(0|1)$|^net462$|^net([8-9]|[1-9][0-9])(?:\.[0-9]+)?(?:[-.].*)?$'))" />
+		</ItemGroup>
+
+		<Error
+			Condition="'$(LangVersion)' == ''"
+			Code="KG1001"
+			Text="Riverside Kiota requires C# LangVersion 7.3 or later. Set &lt;LangVersion&gt;7.3&lt;/LangVersion&gt; or newer." />
+
+		<Error
+			Condition="
+				'$(LangVersion)' != ''
+				and !($([System.String]::Copy('$(LangVersion)').Equals('latest', System.StringComparison.OrdinalIgnoreCase)))
+				and !($([System.String]::Copy('$(LangVersion)').Equals('latestmajor', System.StringComparison.OrdinalIgnoreCase)))
+				and !($([System.String]::Copy('$(LangVersion)').Equals('preview', System.StringComparison.OrdinalIgnoreCase)))
+				and $([System.Text.RegularExpressions.Regex]::IsMatch('$(LangVersion)', '^[0-9]+(\.[0-9]+)?$'))
+				and !$([MSBuild]::VersionGreaterThanOrEquals('$(LangVersion)', '$(Kiota_MinLangVersion)'))"
+			Code="KG1002"
+			Text="The Advanced Compiler Services for .NET library requires C# 7.3 or later. The current language version is '$(LangVersion)'." />
+
+		<Error
+			Condition="
+				'$(LangVersion)' != ''
+				and !($([System.String]::Copy('$(LangVersion)').Equals('latest', System.StringComparison.OrdinalIgnoreCase)))
+				and !($([System.String]::Copy('$(LangVersion)').Equals('latestmajor', System.StringComparison.OrdinalIgnoreCase)))
+				and !($([System.String]::Copy('$(LangVersion)').Equals('preview', System.StringComparison.OrdinalIgnoreCase)))
+				and !$([System.Text.RegularExpressions.Regex]::IsMatch('$(LangVersion)', '^[0-9]+(\.[0-9]+)?$'))"
+			Code="KG1003"
+			Text="The Advanced Compiler Services for .NET library requires C# 7.3 or later. Unsupported LangVersion value '$(LangVersion)'." />
+
+		<Error
+			Condition="'@(_Kiota_InvalidFramework)' != ''"
+			Code="KG1004"
+			Text="The Advanced Compiler Services for .NET library supports only netstandard2.0, netstandard2.1, net462, and net8.0 or later. Invalid target framework(s): @(_Kiota_InvalidFramework, ', ')." />
+
+		<Warning
+			Condition="'$(Nullable)' == '' or $([System.String]::Copy('$(Nullable)').Equals('disable', System.StringComparison.OrdinalIgnoreCase))"
+			Code="KG2001"
+			Text="Nullable is disabled. Consider enabling nullable reference types (&lt;Nullable&gt;enable&lt;/Nullable&gt;) for generated Kiota clients." />
+	</Target>
+
+</Project>

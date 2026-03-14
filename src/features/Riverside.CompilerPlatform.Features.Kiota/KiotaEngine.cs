@@ -1,6 +1,6 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Riverside.CompilerPlatform.Features.Swagger;
+namespace Riverside.CompilerPlatform.Features.Kiota;
 
 /// <summary>
 /// Represents the configuration and options for generating code using the Kiota engine.
@@ -128,6 +128,7 @@ public partial class KiotaEngine
 	/// <param name="l">The target programming language for code generation.</param>
 	/// <param name="c">The name of the root class to be generated. Can be null to use a default class name.</param>
 	/// <param name="tam">The access modifier to apply to generated types. Can be null to use the default accessibility.</param>
+	/// <param name="n">The namespace for the generated client class. Can be null to use the default namespace.</param>
 	/// <param name="ll">The log level to use for diagnostic output during generation. Can be null to use the default log level.</param>
 	/// <param name="b">Indicates whether to use a backing store for generated models. If null, the default behavior is used.</param>
 	/// <param name="ebc">Indicates whether to exclude backward compatible code from the output. If null, the default behavior is used.</param>
@@ -141,7 +142,8 @@ public partial class KiotaEngine
 	/// <param name="dvr">An array of validation rules to disable during generation. Can be null to enable all rules.</param>
 	/// <param name="cc">Indicates whether to clear the internal cache before generation. If null, the default behavior is used.</param>
 	/// <param name="dsv">Indicates whether to disable SSL validation for network operations. If null, the default behavior is used.</param>
-	public KiotaEngine(string? d, string? a, string? o, GenerationLanguage l, string? c, Accessibility? tam, ConsoleLogLevel? ll, bool? b, bool? ebc, bool? ad, string[]? s, string[]? ds, bool? co, string[]? m, string[]? i, string[]? e, ValidationRules[]? dvr, bool? cc, bool? dsv)
+	[SetsRequiredMembers]
+	public KiotaEngine(string? d, string? a, string? o, GenerationLanguage l, string? c, Accessibility? tam, string? n, ConsoleLogLevel? ll, bool? b, bool? ebc, bool? ad, string[]? s, string[]? ds, bool? co, string[]? m, string[]? i, string[]? e, ValidationRules[]? dvr, bool? cc, bool? dsv)
 	{
 		Path = d;
 		Manifest = a;
@@ -149,6 +151,7 @@ public partial class KiotaEngine
 		Language = l;
 		ClassName = c;
 		TypeAccessModifier = tam;
+		NamespaceName = n;
 		LogLevel = ll;
 		BackingStore = b;
 		ExcludeBackwardCompatible = ebc;
