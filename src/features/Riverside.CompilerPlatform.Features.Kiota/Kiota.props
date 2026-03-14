@@ -6,7 +6,7 @@
 		<Kiota_BundlePackageVersion>1.21.2</Kiota_BundlePackageVersion>
 	</PropertyGroup>
 
-	<Target Name="Kiota_EnsureDependencies" BeforeTargets="CollectPackageReferences">
+	<!--<Target Name="Kiota_EnsureDependencies" BeforeTargets="CollectPackageReferences">
 		<ItemGroup>
 			<PackageReference
 				Include="Microsoft.Kiota.Authentication.Azure"
@@ -17,7 +17,7 @@
 				Version="$(Kiota_BundlePackageVersion)"
 				Condition="'@(PackageReference->WithMetadataValue('Identity', 'Microsoft.Kiota.Bundle'))' == ''" />
 		</ItemGroup>
-	</Target>
+	</Target>-->
 
 	<Target Name="Kiota_ValidateLanguageAndFramework" BeforeTargets="CoreCompile">
 		<ItemGroup>

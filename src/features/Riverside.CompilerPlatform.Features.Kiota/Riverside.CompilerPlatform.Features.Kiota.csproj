@@ -22,6 +22,8 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.Kiota.Authentication.Azure" Version="1.21.2" />
+		<PackageReference Include="Microsoft.Kiota.Bundle" Version="1.21.2" />
 	</ItemGroup>
 
 	<Target Name="PackKiotaAnalyzer" BeforeTargets="_GetPackageFiles">
