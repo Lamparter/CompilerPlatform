@@ -85,8 +85,8 @@ public partial class KiotaGenerator : IncrementalGenerator
 			{
 				CreateDiagnostic(
 					"KG0000",
-					"Kiota installation failed",
-					installError ?? "Failed to install or locate the Kiota tool.").Report(context);
+					"Microsoft Kiota installation failed",
+					installError ?? "Failed to install or locate the Microsoft Kiota tool.").Report(context);
 				return;
 			}
 
@@ -94,7 +94,7 @@ public partial class KiotaGenerator : IncrementalGenerator
 		}
 		catch (Exception ex)
 		{
-			CreateDiagnostic("KG0000", "Kiota installation failed", ex.Message).Report(context);
+			CreateDiagnostic("KG0000", "Microsoft Kiota installation failed", ex.Message).Report(context);
 			return;
 		}
 
@@ -144,8 +144,8 @@ public partial class KiotaGenerator : IncrementalGenerator
 				{
 					CreateDiagnostic(
 						"KG0001",
-						"Kiota generation failed",
-						$"Kiota failed for spec '{specPath}' with exit code {runResult.ExitCode}: {runResult.StandardError.ReplaceLineEndings(" ")}").Report(context);
+						"OpenAPI generation failed",
+						$"Microsoft Kiota failed for spec '{specPath}' with exit code {runResult.ExitCode}: {runResult.StandardError.ReplaceLineEndings(" ")}").Report(context);
 					DirectoryHelpers.TryDelete(tempOut);
 					continue;
 				}
@@ -156,7 +156,7 @@ public partial class KiotaGenerator : IncrementalGenerator
 					CreateDiagnostic(
 						"KG0002",
 						"No C# files generated",
-						$"Kiota produced no C# files for spec '{specPath}'").Report(context);
+						$"Microsoft Kiota produced no C# files for spec '{specPath}'").Report(context);
 					DirectoryHelpers.TryDelete(tempOut);
 					continue;
 				}
@@ -181,11 +181,11 @@ public partial class KiotaGenerator : IncrementalGenerator
 					}
 				}
 
-				//DirectoryHelpers.TryDelete(tempOut);
+				DirectoryHelpers.TryDelete(tempOut);
 			}
 			catch (Exception ex)
 			{
-				CreateDiagnostic("KG9999", "Kiota generator exception", ex.ToString()).Report(context);
+				CreateDiagnostic("KG9999", "OpenAPI generator exception", ex.ToString()).Report(context);
 				DirectoryHelpers.TryDelete(tempOut);
 			}
 		}
