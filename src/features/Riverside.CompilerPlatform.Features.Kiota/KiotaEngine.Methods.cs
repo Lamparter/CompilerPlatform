@@ -1,7 +1,7 @@
 ﻿using Riverside.CompilerPlatform.Helpers;
 using System.Text;
 
-namespace Riverside.CompilerPlatform.Features.Swagger;
+namespace Riverside.CompilerPlatform.Features.Kiota;
 
 partial class KiotaEngine
 {

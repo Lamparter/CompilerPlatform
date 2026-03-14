@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Riverside.CompilerPlatform.Features.Swagger;
+namespace Riverside.CompilerPlatform.Features.Kiota;
 
 /// <summary>
 /// Represents the configuration and options for generating code using the Kiota engine.

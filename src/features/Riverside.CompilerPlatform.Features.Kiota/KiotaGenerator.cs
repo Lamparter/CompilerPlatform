@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Riverside.CompilerPlatform.Features.Swagger;
+namespace Riverside.CompilerPlatform.Features.Kiota;
 
 /// <summary>
 /// Generates source code from OpenAPI specification files as part of the build process.

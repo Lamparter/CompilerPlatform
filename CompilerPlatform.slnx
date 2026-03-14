@@ -9,7 +9,7 @@
 			<BuildType Project="CSharp" />
 			<Build Solution="VisualBasic|*" Project="false" />
 		</Project>
-		<Project Path="src/features/Riverside.CompilerPlatform.Features.Swagger/Riverside.CompilerPlatform.Features.Swagger.csproj" Id="ba9bb2cd-6a93-4e05-9e46-4917360831a2">
+		<Project Path="src/features/Riverside.CompilerPlatform.Features.Kiota/Riverside.CompilerPlatform.Features.Kiota.csproj" Id="ba9bb2cd-6a93-4e05-9e46-4917360831a2">
 			<BuildType Project="CSharp" />
 			<Build Solution="VisualBasic|*" Project="false" />
 		</Project>
