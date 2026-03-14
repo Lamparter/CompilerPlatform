@@ -26,7 +26,14 @@
 
 	<PropertyGroup>
 		<Product>Riverside.CompilerPlatform</Product>
-		<Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)</Version>
+
+		<CurrentYear>$([System.DateTime]::Now.ToString("yy"))</CurrentYear>
+		<CurrentMonth>$([System.DateTime]::Now.ToString("MM"))</CurrentMonth>
+		<CurrentDay>$([System.DateTime]::Now.ToString("dd"))</CurrentDay>
+		<BuildDate>$(CurrentYear)$(CurrentMonth)$(CurrentDay)</BuildDate>
+
+		<AssemblyVersion>$(MajorVersion).$(MinorVersion)</AssemblyVersion>
+		<Version>$(MajorVersion).$(MinorVersion).$(BuildDate)</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
