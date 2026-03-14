@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Configurations>CSharp</Configurations>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<NoWarn>$(NoWarn);NU5128</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" PrivateAssets="all" />
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.Extensions\Riverside.CompilerPlatform.Extensions.csproj" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Kiota.props" Pack="true" PackagePath="buildTransitive\$(AssemblyName).props" />
+		<None Include="Kiota.props" Pack="true" PackagePath="build\$(AssemblyName).props" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Polyfill" Version="9.18.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<Target Name="PackKiotaAnalyzer" BeforeTargets="_GetPackageFiles">
+		<ItemGroup>
+			<None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/cs" Visible="false" />
+			<None Include="$(TargetDir)$(AssemblyName).pdb" Pack="true" PackagePath="analyzers/cs" Visible="false" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+			<None
+				Include="@(ReferenceCopyLocalPaths)"
+				Pack="true"
+				PackagePath="analyzers/cs"
+				Visible="false"
+				Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll' and '%(ReferenceCopyLocalPaths.FileName)' != '$(AssemblyName)' and $([System.String]::Copy('%(ReferenceCopyLocalPaths.FileName)').StartsWith('Riverside.CompilerPlatform.', System.StringComparison.OrdinalIgnoreCase))" />
+		</ItemGroup>
+	</Target>
+
+</Project>

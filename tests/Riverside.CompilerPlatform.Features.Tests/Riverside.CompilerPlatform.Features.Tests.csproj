@@ -3,25 +3,28 @@
 	<PropertyGroup>
 		<Configurations>VisualBasic;CSharp</Configurations>
 		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>14.0</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!--<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />-->
-		<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.Swagger\Riverside.CompilerPlatform.Features.Swagger.csproj" OutputItemType="Analyzer" />
-		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" OutputItemType="Analyzer" />
+	  <Compile Remove="$(ExtensionsDirectory)\GlobalUsings.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CompareNETObjects" Version="4.84.0" />
-		<PackageReference Include="Microsoft.Extensions.Http" Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'netstandard1.4' or '$(TargetFramework)' == 'netstandard1.5' or '$(TargetFramework)' == 'netstandard1.6' or '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1'" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'netstandard1.4' or '$(TargetFramework)' == 'netstandard1.5' or '$(TargetFramework)' == 'netstandard1.6' or '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1'" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Http.Polly" Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'netstandard1.4' or '$(TargetFramework)' == 'netstandard1.5' or '$(TargetFramework)' == 'netstandard1.6' or '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1'" Version="5.0.1" />
-		<PackageReference Include="System.Threading.Channels" Version="8.0.0" />
-		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+		<!--<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.Kiota\Riverside.CompilerPlatform.Features.Kiota.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.Extensions\Riverside.CompilerPlatform.Extensions.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
 	</ItemGroup>
 
 	<ItemGroup>
-		<AdditionalFiles Include="api-1.json" />
+		<PackageReference Include="Microsoft.Kiota.Authentication.Azure" Version="1.21.2" />
+		<PackageReference Include="Microsoft.Kiota.Bundle" Version="1.21.2" />
+		<PackageReference Include="Riverside.CompilerPlatform.CSharp.Features.Kiota" Version="1.5.1" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="Lapse12345.json" />
 	</ItemGroup>
 	
 </Project>

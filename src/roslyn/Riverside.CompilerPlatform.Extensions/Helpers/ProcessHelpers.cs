@@ -49,8 +49,7 @@ public static class ProcessHelpers
 	/// A tuple containing the process exit code, the captured standard output, and the captured standard error.
 	/// If the process times out, the exit code is <c>-1</c> and the standard error includes a timeout message.
 	/// </returns>
-	public static async Task<ProcessOutput>
-		RunProcess(string fileName, string arguments, TimeSpan timeout)
+	public static async Task<ProcessOutput> RunProcess(string fileName, string arguments, TimeSpan timeout)
 	{
 		var psi = new ProcessStartInfo
 		{
@@ -82,4 +81,14 @@ public static class ProcessHelpers
 
 		return new(proc.ExitCode, outputSb.ToString(), errorSb.ToString());
 	}
+
+	/// <summary>
+	/// Runs a <c>dotnet</c> command asynchronously with the specified arguments and timeout,
+	/// capturing its exit code, standard output, and standard error.
+	/// </summary>
+	/// <param name="arguments">The arguments to pass after <c>dotnet</c> (e.g. <c>tool install Riverside.JsonBinder.Console ...</c>).</param>
+	/// <param name="timeout">The maximum duration to wait before forcibly terminating the process.</param>
+	/// <returns>A <see cref="ProcessOutput"/> containing the exit code and captured streams.</returns>
+	public static Task<ProcessOutput> RunNETCoreCliAsync(string arguments, TimeSpan timeout)
+		=> RunProcess("dotnet", arguments, timeout);
 }

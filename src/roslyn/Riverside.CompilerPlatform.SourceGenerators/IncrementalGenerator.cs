@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Riverside.CompilerPlatform.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -249,12 +250,11 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 					if (!SuppressDiagnostics)
 					{
 						// Report exceptions that occur during generation
-						sourceProductionContext.ReportDiagnostic(
-							CreateDiagnostic(
-								$"RS9999",
-								"Source Generation Error",
-								$"An error occurred during source generation: {ex.Message}",
-								DiagnosticSeverity.Error));
+						CreateDiagnostic(
+							$"RS9999",
+							"Source Generation Error",
+							$"An error occurred during source generation: {ex.Message}",
+							DiagnosticSeverity.Error).Report(Context);
 					}
 				}
 			});

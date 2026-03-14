@@ -1,5 +1,4 @@
-﻿using Riverside.Extensions.Accountability;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -36,7 +35,6 @@ public static class SanitizationHelpers
 	/// <param name="arg">The argument to escape.</param>
 	/// <returns>A string containing the escaped argument, suitable for use in a command-line context.</returns>
 	/// <exception cref="ArgumentNullException">Thrown if <paramref name="arg"/> is null.</exception>
-	[NotMyCode] // from the internet
 	public static string EscapeArg(string arg)
 	{
 		if (arg == null)
