@@ -18,7 +18,7 @@ namespace Riverside.CompilerPlatform.Features.Swagger;
 /// Generates source code from OpenAPI specification files as part of the build process.
 /// </summary>
 [Generator]
-public class SwaggerGenerator : IncrementalGenerator
+public partial class SwaggerGenerator : IncrementalGenerator
 {
 	private const string VersionProperty = "build_property.SwaggerGenerator_Version";
 	private const string OptionsProperty = "build_property.SwaggerGenerator_Options";
@@ -45,7 +45,6 @@ public class SwaggerGenerator : IncrementalGenerator
 
 		version ??= "7.20.0";
 		language ??= "csharp";
-		additionalProps ??= $"packageName=Riverside.CompilerPlatform.ABI,apiName=GenericHost,targetFramework=netstandard2.0,nullableReferenceTypes=true,useOneOfInterface=true"; // test values
 
 		var jarPath = EnsureJarDownloaded(version, context);
 
@@ -62,9 +61,14 @@ public class SwaggerGenerator : IncrementalGenerator
 		{
 			try
 			{
+				var specNamespace = SanitizationHelpers.Sanitize(Path.GetFileNameWithoutExtension(Path.GetFileName(spec.Path)));
+				additionalProps ??= $"packageName={specNamespace},apiName=generichost,targetFramework=netstandard2.0,nullableReferenceTypes=true,useCompareNetObjects=true,equatable=true,netCoreProjectFile=true";
+
 				var specPath = spec.Path;
 				if (!File.Exists(specPath))
 					continue;
+
+				var specFileName = Path.GetFileNameWithoutExtension(specPath);
 
 				var tempOut = Path.Combine(Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET", Guid.NewGuid().ToString("N"));
 				Directory.CreateDirectory(tempOut);
@@ -103,7 +107,7 @@ public class SwaggerGenerator : IncrementalGenerator
 					continue;
 				}
 
-				var srcDir = Path.Combine(tempOut, "src", "Riverside.CompilerPlatform.ABI");
+				var srcDir = Path.Combine(tempOut, "src", specNamespace);
 				var csFiles = Directory.EnumerateFiles(srcDir, "*.cs", SearchOption.AllDirectories).ToArray();
 				if (csFiles.Length == 0)
 				{
@@ -121,8 +125,7 @@ public class SwaggerGenerator : IncrementalGenerator
 							.Replace(Path.DirectorySeparatorChar, '_')
 							.Replace(Path.AltDirectorySeparatorChar, '_');
 
-						var specFileName = Path.GetFileNameWithoutExtension(specPath);
-						var hintName = $"Swagger_{SanitizationHelpers.Sanitize(specFileName)}_{SanitizationHelpers.Sanitize(rel)}";
+						var hintName = $"{SanitizationHelpers.Sanitize(specFileName)}_{SanitizationHelpers.Sanitize(rel)}";
 						AddSource(hintName, content);
 					}
 					catch (Exception ex)
@@ -132,6 +135,8 @@ public class SwaggerGenerator : IncrementalGenerator
 				}
 
 				TryDeleteDirectory(tempOut);
+
+				AddSource($"{SanitizationHelpers.Sanitize(specFileName)}_AnyOf", AnyOf_Polyfill(specNamespace + ".Model"));
 			}
 			catch (Exception ex)
 			{

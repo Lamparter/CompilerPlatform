@@ -1,6 +1,7 @@
 ﻿using Riverside.Extensions.Accountability;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Riverside.CompilerPlatform.Features.Swagger.Helpers;
@@ -20,7 +21,7 @@ public static class SanitizationHelpers
 	/// </returns>
 	public static string Sanitize(string s)
 	{
-		var invalid = Path.GetInvalidFileNameChars();
+		var invalid = Path.GetInvalidFileNameChars().Append('-').ToArray();
 		var sb = new StringBuilder(s.Length);
 		foreach (var ch in s)
 			sb.Append(invalid.Contains(ch) ? '_' : ch);
