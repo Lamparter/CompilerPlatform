@@ -20,6 +20,8 @@ jobs:
         exclude:
           - configuration: VisualBasic
             project: DynamicCast
+          - configuration: VisualBasic
+            project: Swagger
 
     env:
       PROJECT: ${{ matrix.project }}
