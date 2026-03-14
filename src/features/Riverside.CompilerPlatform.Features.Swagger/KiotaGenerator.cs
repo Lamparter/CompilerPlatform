@@ -1,12 +1,12 @@
-using Riverside.CompilerPlatform.SourceGenerators;
-using System.Threading;
-using System;
-using System.Linq;
-using System.Collections.Immutable;
-using System.IO;
-using System.Text;
+﻿using Riverside.CompilerPlatform.SourceGenerators;
 using Riverside.CompilerPlatform.Extensions;
 using Riverside.CompilerPlatform.Helpers;
+using System;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
 
 namespace Riverside.CompilerPlatform.Features.Swagger;
 
@@ -41,78 +41,123 @@ public partial class KiotaGenerator : IncrementalGenerator
 	/// <inheritdoc/>
 	protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 	{
-		var optionsProvider = context.AnalyzerConfigOptions.GlobalOptions;
+		var options = context.AnalyzerConfigOptions.GlobalOptions;
 
-		// OpenAPI specs
 		var specs = context.AdditionalTexts
 			.Where(at => at.Path.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)
 					  || at.Path.EndsWith(".yml", StringComparison.OrdinalIgnoreCase)
 					  || at.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
 			.ToImmutableArray();
 
-		optionsProvider.TryGetValue(VersionProperty, out var version);
-		optionsProvider.TryGetValue(OptionsProperty, out var cliOptions);
-		optionsProvider.TryGetValue(LanguageProperty, out var language);
-		optionsProvider.TryGetValue(AdditionalPropertiesProperty, out var additionalProps);
+		if (specs.IsEmpty)
+			return;
 
-		version ??= string.Empty;
-		language ??= "csharp";
+		var version = options.GetString(VersionProperty);
 
-		var jarPath = EnsureToolInstallation(version, context);
+		// Kiota engine args
+		var language = options.GetNullableEnum<KiotaEngine.GenerationLanguage>(LanguageProperty)
+			?? KiotaEngine.GenerationLanguage.CSharp;
+		var className = options.GetString(ClassNameProperty);
+		var namespaceName = options.GetString(NamespaceNameProperty);
+		var typeAccessModifier = options.GetNullableEnum<KiotaEngine.Accessibility>(TypeAccessModifierProperty);
+		var logLevel = options.GetNullableEnum<KiotaEngine.ConsoleLogLevel>(LogLevelProperty);
+		var backingStore = options.GetNullableBool(BackingStoreProperty);
+		var excludeBackwardCompatible = options.GetNullableBool(ExcludeBackwardCompatibleProperty);
+		var additionalData = options.GetNullableBool(AdditionalDataProperty);
+		var serializers = options.GetPipeSeparatedArray(SerializerProperty);
+		var deserializers = options.GetPipeSeparatedArray(DeserializerProperty);
+		var cleanOutput = options.GetNullableBool(CleanOutputProperty);
+		var structuredMimeTypes = options.GetPipeSeparatedArray(StructuredMimeTypesProperty);
+		var includePaths = options.GetPipeSeparatedArray(IncludePathProperty);
+		var excludePaths = options.GetPipeSeparatedArray(ExcludePathProperty);
+		var disableValidationRules = options.GetPipeSeparatedEnumArray<KiotaEngine.ValidationRules>(DisableValidationRulesProperty);
+		var clearCache = options.GetNullableBool(ClearCacheProperty);
+		var disableSSLValidation = options.GetNullableBool(DisableSSLValidationProperty);
 
-		if (string.IsNullOrWhiteSpace(jarPath))
+		string toolExecutable;
+		try
 		{
-			IncrementalGenerator.CreateDiagnostic(
-				"RS0000",
-				"JAR not downloaded",
-				"An error occured whilst downloading the JAR executable to generate the OpenAPI spec")
-				.Report(context);
+			var (installed, installError) = NETCoreToolHelpers
+				.EnsureToolAsync("Microsoft.OpenApi.Kiota", ToolDirectory, version)
+				.GetAwaiter().GetResult();
+
+			if (!installed)
+			{
+				CreateDiagnostic(
+					"KG0000",
+					"Kiota installation failed",
+					installError ?? "Failed to install or locate the Kiota tool.").Report(context);
+				return;
+			}
+
+			toolExecutable = NETCoreToolHelpers.GetExecutablePath(ToolDirectory, "kiota");
+		}
+		catch (Exception ex)
+		{
+			CreateDiagnostic("KG0000", "Kiota installation failed", ex.Message).Report(context);
+			return;
 		}
 
 		foreach (var spec in specs)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			var specPath = spec.Path;
+			if (!File.Exists(specPath))
+				continue;
+
+			var specFileName = Path.GetFileNameWithoutExtension(specPath);
+			var effectiveNamespace = namespaceName ?? SanitizationHelpers.Sanitize(specFileName);
+
+			var tempOut = DirectoryHelpers.CreateTemporary(
+				Path.Combine(Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET"));
+
 			try
 			{
-				var specNamespace = SanitizationHelpers.Sanitize(Path.GetFileNameWithoutExtension(Path.GetFileName(spec.Path)));
+				var engine = new KiotaEngine(
+					d: specPath,
+					a: null,
+					o: tempOut,
+					l: language,
+					c: className,
+					n: effectiveNamespace,
+					tam: typeAccessModifier,
+					ll: logLevel,
+					b: backingStore,
+					ebc: excludeBackwardCompatible,
+					ad: additionalData,
+					s: serializers,
+					ds: deserializers,
+					co: cleanOutput,
+					m: structuredMimeTypes,
+					i: includePaths,
+					e: excludePaths,
+					dvr: disableValidationRules,
+					cc: clearCache,
+					dsv: disableSSLValidation);
 
-				var specPath = spec.Path;
-				if (!File.Exists(specPath))
-					continue;
-
-				var specFileName = Path.GetFileNameWithoutExtension(specPath);
-
-				var tempOut = Path.Combine(Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET", Guid.NewGuid().ToString("N"));
-				Directory.CreateDirectory(tempOut);
-
-				if (!string.IsNullOrWhiteSpace(cliOptions))
-				{
-					argsBuilder.Append(" ");
-					argsBuilder.Append(cliOptions);
-				}
-
-				if (!string.IsNullOrWhiteSpace(additionalProps))
-				{
-					argsBuilder.Append(" --additional-properties=");
-					argsBuilder.Append(SanitizationHelpers.EscapeArg(additionalProps!));
-				}
-
-				var args = argsBuilder.ToString();
-
-				var runResult = ProcessHelpers.RunProcess("java", args, TimeSpan.FromMinutes(2)).GetAwaiter().GetResult();
+				var runResult = ProcessHelpers
+					.RunProcess(toolExecutable, engine.ToString(), TimeSpan.FromMinutes(2))
+					.GetAwaiter().GetResult();
 
 				if (runResult.ExitCode != 0)
 				{
-					CreateDiagnostic("RS0000", "OpenAPI generator failed", $"OpenAPI generator failed for spec '{spec.Path}' with exit code {runResult.ExitCode}: {runResult.StandardError.ReplaceLineEndings(" ")}").Report(context);
-					TryDeleteDirectory(tempOut);
+					CreateDiagnostic(
+						"KG0001",
+						"Kiota generation failed",
+						$"Kiota failed for spec '{specPath}' with exit code {runResult.ExitCode}: {runResult.StandardError.ReplaceLineEndings(" ")}").Report(context);
+					DirectoryHelpers.TryDelete(tempOut);
 					continue;
 				}
 
-				var srcDir = Path.Combine(tempOut, "src", specNamespace);
-				var csFiles = Directory.EnumerateFiles(srcDir, "*.cs", SearchOption.AllDirectories).ToArray();
+				var csFiles = Directory.EnumerateFiles(tempOut, "*.cs", SearchOption.AllDirectories).ToArray();
 				if (csFiles.Length == 0)
 				{
-					CreateDiagnostic("RS0000", "No C# files generated", $"OpenAPI generator produced no C# files for spec '{spec.Path}'").Report(context);
-					TryDeleteDirectory(tempOut);
+					CreateDiagnostic(
+						"KG0002",
+						"No C# files generated",
+						$"Kiota produced no C# files for spec '{specPath}'").Report(context);
+					DirectoryHelpers.TryDelete(tempOut);
 					continue;
 				}
 
@@ -122,52 +167,27 @@ public partial class KiotaGenerator : IncrementalGenerator
 					{
 						var content = File.ReadAllText(cs, Encoding.UTF8);
 						var rel = Path.GetRelativePath(tempOut, cs)
-							.Replace(Path.DirectorySeparatorChar, '_')
-							.Replace(Path.AltDirectorySeparatorChar, '_');
-
-						var hintName = $"{SanitizationHelpers.Sanitize(specFileName)}_{SanitizationHelpers.Sanitize(rel)}";
+							.Replace(Path.DirectorySeparatorChar, '.')
+							.Replace(Path.AltDirectorySeparatorChar, '.');
+						var hintName = $"{SanitizationHelpers.Sanitize(engine.NamespaceName!)}.{SanitizationHelpers.Sanitize(rel)}";
 						AddSource(hintName, content);
 					}
 					catch (Exception ex)
 					{
-						CreateDiagnostic("RS0000", "Failed to add generated file", $"Failed to add generated file '{cs}': {ex.Message}").Report(context);
+						CreateDiagnostic(
+							"KG0003",
+							"Failed to add generated file",
+							$"Failed to add '{cs}': {ex.Message}").Report(context);
 					}
 				}
 
-				TryDeleteDirectory(tempOut);
-
-				AddSource($"{SanitizationHelpers.Sanitize(specFileName)}_AnyOf", AnyOf_Polyfill(specNamespace + ".Model"));
+				//DirectoryHelpers.TryDelete(tempOut);
 			}
 			catch (Exception ex)
 			{
-				CreateDiagnostic("RS9999", "OpenAPI generator exception", ex.ToString());
+				CreateDiagnostic("KG9999", "Kiota generator exception", ex.ToString()).Report(context);
+				DirectoryHelpers.TryDelete(tempOut);
 			}
 		}
-	}
-
-	private static string? EnsureToolInstallation(string version, GeneratorContext context)
-	{
-		try
-		{
-			var baseDir = Path.Combine(Path.GetTempPath(), "Roslyn", "Advanced Compiler Services for .NET", "KiotaGenerator");
-			Directory.CreateDirectory(baseDir);
-
-			var jarPath = Path.Combine(baseDir, $"openapi-generator-cli-{version}.jar");
-			if (File.Exists(jarPath))
-				return jarPath;
-
-			return jarPath;
-		}
-		catch (Exception ex)
-		{
-			CreateDiagnostic("RS0000", $"Failed to download OpenAPI generator JAR", $"Could not download version {version}: {ex.Message}").Report(context);
-			return null;
-		}
-	}
-
-	private static void TryDeleteDirectory(string path)
-	{
-		try { if (Directory.Exists(path)) Directory.Delete(path, true); }
-		catch { }
 	}
 }
