@@ -78,7 +78,7 @@ public partial class KiotaGenerator : IncrementalGenerator
 		try
 		{
 			var (installed, installError) = NETCoreToolHelpers
-				.EnsureToolAsync("Microsoft.OpenApi.Kiota", ToolDirectory, version)
+				.EnsureToolAsync("Microsoft.OpenApi.Kiota", ToolDirectory, version, commandName: "kiota")
 				.GetAwaiter().GetResult();
 
 			if (!installed)
