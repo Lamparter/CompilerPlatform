@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Configurations>VisualBasic;CSharp</Configurations>
@@ -11,18 +11,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!--<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.DynamicCast\Riverside.CompilerPlatform.Features.DynamicCast.csproj" OutputItemType="Analyzer" />
 		<ProjectReference Include="$(FeaturesDirectory)\Riverside.CompilerPlatform.Features.Kiota\Riverside.CompilerPlatform.Features.Kiota.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.Extensions\Riverside.CompilerPlatform.Extensions.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.Extensions\Riverside.CompilerPlatform.Extensions.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Riverside.CompilerPlatform.CSharp.Features.Kiota" Version="1.5.0" PrivateAssets="all" />
+		<!--<PackageReference Include="Riverside.CompilerPlatform.CSharp.Features.Kiota" Version="1.5.0" PrivateAssets="all" />-->
+		<PackageReference Include="Microsoft.Kiota.Authentication.Azure" Version="1.21.2" />
+		<PackageReference Include="Microsoft.Kiota.Bundle" Version="1.21.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<AdditionalFiles Include="Lapse12345.json" />
+		<AdditionalFiles Include="Lapse.json" />
 	</ItemGroup>
 	
 </Project>
