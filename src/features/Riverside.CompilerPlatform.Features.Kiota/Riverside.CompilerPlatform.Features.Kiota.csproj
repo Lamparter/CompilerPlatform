@@ -3,11 +3,14 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Configurations>CSharp</Configurations>
+		<IsRoslynComponent>true</IsRoslynComponent>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<NoWarn>$(NoWarn);NU5128</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" />
-		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.Extensions\Riverside.CompilerPlatform.Extensions.csproj" />
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.SourceGenerators\Riverside.CompilerPlatform.SourceGenerators.csproj" PrivateAssets="all" />
+		<ProjectReference Include="$(ExtensionsDirectory)\Riverside.CompilerPlatform.Extensions\Riverside.CompilerPlatform.Extensions.csproj" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -21,5 +24,18 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
+
+	<Target Name="PackKiotaAnalyzer" BeforeTargets="_GetPackageFiles">
+		<ItemGroup>
+			<None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/cs" Visible="false" />
+			<None Include="$(TargetDir)$(AssemblyName).pdb" Pack="true" PackagePath="analyzers/cs" Visible="false" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+			<None
+				Include="@(ReferenceCopyLocalPaths)"
+				Pack="true"
+				PackagePath="analyzers/cs"
+				Visible="false"
+				Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll' and '%(ReferenceCopyLocalPaths.FileName)' != '$(AssemblyName)' and $([System.String]::Copy('%(ReferenceCopyLocalPaths.FileName)').StartsWith('Riverside.CompilerPlatform.', System.StringComparison.OrdinalIgnoreCase))" />
+		</ItemGroup>
+	</Target>
 
 </Project>
