@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Configurations>CSharp</Configurations>
-		<IsRoslynComponent>true</IsRoslynComponent>
 		<IncludeBuildOutput>false</IncludeBuildOutput>
 		<NoWarn>$(NoWarn);NU5128</NoWarn>
 	</PropertyGroup>

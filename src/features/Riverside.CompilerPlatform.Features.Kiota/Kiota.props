@@ -21,10 +21,6 @@
 
 	<Target Name="Kiota_ValidateLanguageAndFramework" BeforeTargets="CoreCompile">
 		<ItemGroup>
-			<Analyzer Include="$(MSBuildThisFileDirectory\..\analyzers\cs\Riverside.CompilerPlatform.CSharp.Features.Kiota.dll" />
-		</ItemGroup>
-		
-		<ItemGroup>
 			<_Kiota_TargetFramework Include="$(TargetFramework)" Condition="'$(TargetFramework)' != ''" />
 			<_Kiota_TargetFramework Include="$(TargetFrameworks)" Condition="'$(TargetFrameworks)' != ''" />
 			<_Kiota_InvalidFramework Include="@(_Kiota_TargetFramework)"
