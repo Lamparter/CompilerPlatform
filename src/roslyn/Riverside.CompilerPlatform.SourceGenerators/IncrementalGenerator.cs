@@ -251,7 +251,7 @@ public abstract class IncrementalGenerator : IIncrementalGenerator, IDebuggableG
 						// Report exceptions that occur during generation
 						sourceProductionContext.ReportDiagnostic(
 							CreateDiagnostic(
-								$"RX9999",
+								$"RS9999",
 								"Source Generation Error",
 								$"An error occurred during source generation: {ex.Message}",
 								DiagnosticSeverity.Error));
