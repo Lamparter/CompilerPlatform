@@ -28,7 +28,6 @@ public partial class SwaggerGenerator : IncrementalGenerator
 	/// <inheritdoc/>
 	protected override void OnBeforeGeneration(GeneratorContext context, CancellationToken cancellationToken)
 	{
-		CreateDiagnostic("A", "A", "A", DiagnosticSeverity.Warning);
 		var optionsProvider = context.AnalyzerConfigOptions.GlobalOptions;
 
 		// OpenAPI specs
