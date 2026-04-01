@@ -24,6 +24,8 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Kiota.Authentication.Azure" Version="1.21.2" />
 		<PackageReference Include="Microsoft.Kiota.Bundle" Version="1.21.2" />
+		<PackageReference Include="System.Net.Http.Json" Version="10.0.4" />
+		<PackageReference Include="System.Text.Json" Version="10.0.4" />
 	</ItemGroup>
 
 	<Target Name="PackKiotaAnalyzer" BeforeTargets="_GetPackageFiles">
